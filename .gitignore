@@ -1,0 +1,26 @@
+# user-specific project files
+*.suo
+*.user
+*.Debug
+*.Release
+*.sdf
+*.opensdf
+
+# object files, linked application, build filed
+*.o
+*.ocpp
+*.oc
+*.obj
+*.a
+*.lib
+*.exe
+*.hi
+*.asv
+[Dd]ebug*/
+[Rr]elease*/
+[Bb]uild*/
+[Rr]un/
+
+
+# IDE files
+.idea
