@@ -1,0 +1,23 @@
+language: cpp
+
+sudo: false
+
+os: linux
+compiler: gcc-5
+addons:
+  apt:
+    sources: ['ubuntu-toolchain-r-test']
+    packages: ['g++-5']
+env:
+  - CC_COMPILER=gcc-5 CXX_COMPILER=g++-5
+
+
+before_script:
+  - wget --no-check-certificate https://cmake.org/files/v3.5/cmake-3.5.2-Linux-x86_64.sh
+  - sh cmake-3.5.2-Linux-x86_64.sh --exclude-subdir --prefix=$HOME
+
+script:
+  - mkdir -p build && cd build
+  - CC=$CC_COMPILER CXX=$CXX_COMPILER cmake .. -DCMAKE_BUILD_TYPE=Debug
+  - make
+  - ./parser
