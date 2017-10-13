@@ -6,16 +6,27 @@
 #define PA193_QTUM_PARSER_PARSER_H
 
 
+#include <fstream>
+#include <iostream>
+#include <cstring>
+#include "entities/block.h"
+
 class parser {
 private:
-    int value;
+    block _b;
 
 public:
-    parser(int value) : value(value)
-    {};
+    explicit parser(std::string&& filename) {
+        std::ifstream file(filename, std::ios::binary);
 
-    int getValue() {
-        return value;
+        if (!file) {
+            std::cout << "failed to open file" << std::endl;
+            std::cout << strerror(errno) << std::endl;
+            return;
+        }
+
+        file >> _b;
+        std::cout << _b;
     }
 };
 

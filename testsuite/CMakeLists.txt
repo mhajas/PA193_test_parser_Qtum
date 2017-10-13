@@ -1,3 +1,4 @@
+find_package(Git)
 if (NOT EXISTS googletest/CMakeLists.txt)
     execute_process(
             COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
@@ -17,3 +18,5 @@ target_link_libraries(testsuite gtest gtest_main parser-lib)
 target_include_directories(testsuite INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/..
         )
+
+file(COPY test-resources DESTINATION resources)

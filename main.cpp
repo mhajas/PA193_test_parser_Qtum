@@ -1,8 +1,6 @@
-#include <iostream>
+#include <memory>
 #include <parser/parser.h>
 
 int main(int argc, char** argv) {
-    parser p(5);
-
-    std::cout << p.getValue() << std::endl;
+    auto p = std::make_unique<parser>("testsuite/resources/test-resources/blocks/22380.bin");
 }
