@@ -17,6 +17,13 @@ class block {
     hash_type _hash_merkle_root;
 public:
     block();
+    explicit block(std::istream& stream);
+
+    uint32_t get_version() const;
+
+    const hash_type& get_hash_prev_block() const;
+
+    const hash_type& get_hash_merkle_root() const;
 
 public:
     friend std::ostream& operator<<(std::ostream& os, const block& block1);

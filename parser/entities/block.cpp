@@ -82,3 +82,19 @@ std::istream& operator>>(std::istream& is, block& block1) {
 }
 
 block::block() : _version(0) {}
+
+block::block(std::istream& stream) {
+    stream >> *this;
+}
+
+uint32_t block::get_version() const {
+    return _version;
+}
+
+const block::hash_type &block::get_hash_prev_block() const {
+    return _hash_prev_block;
+}
+
+const block::hash_type &block::get_hash_merkle_root() const {
+    return _hash_merkle_root;
+}
