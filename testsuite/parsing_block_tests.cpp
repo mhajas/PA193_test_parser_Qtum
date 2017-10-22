@@ -26,6 +26,12 @@ TEST(parsing, correct_block_22380) {
                                                     0x6f, 0xd3, 0xac, 0xf6, 0x6f, 0xb1, 0x1b, 0xbc,
                                                     0xb1, 0x76, 0xed, 0xd7, 0x98, 0x7b, 0xe3, 0x78};
     EXPECT_EQ(hash_prev_block_test, b.get_hash_prev_block()) << "Hash previous block was not parsed correctly";
+
+    EXPECT_EQ(1507372912, b.get_n_time()) << "nTime wasn't parsed correctly";
+
+    EXPECT_EQ(437585635, b.get_n_bits()) << "nBits wasn't parsed correctly";
+
+    EXPECT_EQ(0, b.get_n_nonce()) << "nNonce wasn't parsed correctly";
 }
 
 TEST(parsing, correct_block_22381) {
@@ -49,6 +55,12 @@ TEST(parsing, correct_block_22381) {
                                                     0x43, 0x24, 0x06, 0xb0, 0xdd, 0x3f, 0x28, 0xaa,
                                                     0xf9, 0x13, 0xf4, 0x3f, 0x91, 0x34, 0x57, 0x8e};
     EXPECT_EQ(hash_prev_block_test, b.get_hash_prev_block()) << "Hash previous block was not parsed correctly";
+
+    EXPECT_EQ(1507372960, b.get_n_time()) << "nTime wasn't parsed correctly";
+
+    EXPECT_EQ(437370319, b.get_n_bits()) << "nBits wasn't parsed correctly";
+
+    EXPECT_EQ(0, b.get_n_nonce()) << "nNonce wasn't parsed correctly";
 }
 
 TEST(parsing, correct_block_22382) {
@@ -72,6 +84,12 @@ TEST(parsing, correct_block_22382) {
                                                     0x1c, 0x0a, 0xfb, 0x8c, 0x52, 0x20, 0xa8, 0x49,
                                                     0xb9, 0x62, 0x99, 0x23, 0x75, 0x3f, 0x92, 0x48};
     EXPECT_EQ(hash_prev_block_test, b.get_hash_prev_block()) << "Hash previous block was not parsed correctly";
+
+    EXPECT_EQ(1507373136, b.get_n_time()) << "nTime wasn't parsed correctly";
+
+    EXPECT_EQ(437188646, b.get_n_bits()) << "nBits wasn't parsed correctly";
+
+    EXPECT_EQ(0, b.get_n_nonce()) << "nNonce wasn't parsed correctly";
 }
 
 TEST(parsing, correct_block_22383) {
@@ -95,6 +113,12 @@ TEST(parsing, correct_block_22383) {
                                                     0xec, 0x95, 0xec, 0x99, 0x3e, 0x94, 0xb3, 0xe2,
                                                     0xb3, 0x52, 0xb2, 0x12, 0x1e, 0x8b, 0x59, 0x80};
     EXPECT_EQ(hash_prev_block_test, b.get_hash_prev_block()) << "Hash previous block was not parsed correctly";
+
+    EXPECT_EQ(1507373168, b.get_n_time()) << "nTime wasn't parsed correctly";
+
+    EXPECT_EQ(437280617, b.get_n_bits()) << "nBits wasn't parsed correctly";
+
+    EXPECT_EQ(0, b.get_n_nonce()) << "nNonce wasn't parsed correctly";
 }
 
 TEST(parsing, correct_block_22384) {
@@ -118,6 +142,12 @@ TEST(parsing, correct_block_22384) {
                                                     0xbd, 0x05, 0x87, 0x21, 0x28, 0xaf, 0x8a, 0x50,
                                                     0x15, 0x46, 0x4b, 0x09, 0x16, 0x17, 0x1c, 0x1b};
     EXPECT_EQ(hash_prev_block_test, b.get_hash_prev_block()) << "Hash previous block was not parsed correctly";
+
+    EXPECT_EQ(1507373376, b.get_n_time()) << "nTime wasn't parsed correctly";
+
+    EXPECT_EQ(437079429, b.get_n_bits()) << "nBits wasn't parsed correctly";
+
+    EXPECT_EQ(0, b.get_n_nonce()) << "nNonce wasn't parsed correctly";
 }
 
 TEST(parsing, correct_block_22385) {
@@ -141,4 +171,10 @@ TEST(parsing, correct_block_22385) {
                                                     0x17, 0x47, 0x56, 0x3a, 0x68, 0xb3, 0x4c, 0x8b,
                                                     0x49, 0x6a, 0x7b, 0x9b, 0x37, 0xb0, 0xe5, 0x04};
     EXPECT_EQ(hash_prev_block_test, b.get_hash_prev_block()) << "Hash previous block was not parsed correctly";
+
+    EXPECT_EQ(1507373536, b.get_n_time()) << "nTime wasn't parsed correctly";
+
+    EXPECT_EQ(437215649, b.get_n_bits()) << "nBits wasn't parsed correctly";
+
+    EXPECT_EQ(0, b.get_n_nonce()) << "nNonce wasn't parsed correctly";
 }
