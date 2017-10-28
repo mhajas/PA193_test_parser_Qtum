@@ -57,6 +57,19 @@ std::ostream& operator<<(std::ostream& os, const block& block1) {
     for (auto it : block1._hash_prev_block) os << std::setfill('0') << std::setw(2) << std::hex << (int) it;
     os << std::endl << "Merkle root: ";
     for (auto it : block1._hash_merkle_root) os << std::setfill('0') << std::setw(2) << std::hex << (int) it;
+
+    os << std::endl;
+    os << "nTime: " << block1._n_time << std::endl;
+    os << "nBits: " << block1._n_bits << std::endl;
+    os << "nNonce: " << block1._n_nonce << std::endl;
+
+    os << "Hash state root: ";
+    for (auto it : block1._hash_state_root) os << std::setfill('0') << std::setw(2) << std::hex << (int) it;
+    os << std::endl;
+    os << "Hash UTXO root: ";
+    for (auto it : block1._hash_UTXO_root) os << std::setfill('0') << std::setw(2) << std::hex << (int) it;
+    os << std::endl;
+
     return os;
 }
 
@@ -78,6 +91,37 @@ std::istream& operator>>(std::istream& is, block& block1) {
         is.setstate(std::ios::failbit);
         return is;
     }
+
+    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._n_time), sizeof(block1._n_time), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+        std::cout << "Failed to read nTime" << std::endl;
+        is.setstate(std::ios::failbit);
+        return is;
+    }
+
+    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._n_bits), sizeof(block1._n_bits), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+        std::cout << "Failed to read nBits" << std::endl;
+        is.setstate(std::ios::failbit);
+        return is;
+    }
+
+    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._n_nonce), sizeof(block1._n_nonce), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+        std::cout << "Failed to read nNonce" << std::endl;
+        is.setstate(std::ios::failbit);
+        return is;
+    }
+
+    if (parsing_utils::parse_reverse_bytes(is, static_cast<void*>(block1._hash_state_root.data()), block1._hash_state_root.size(), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+        std::cout << "Failed to read state root hash" << std::endl;
+        is.setstate(std::ios::failbit);
+        return is;
+    }
+
+    if (parsing_utils::parse_reverse_bytes(is, static_cast<void*>(block1._hash_UTXO_root.data()), block1._hash_UTXO_root.size(), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+        std::cout << "Failed to read UTXO root hash" << std::endl;
+        is.setstate(std::ios::failbit);
+        return is;
+    }
+
     return is;
 }
 
@@ -97,4 +141,24 @@ const block::hash_type &block::get_hash_prev_block() const {
 
 const block::hash_type &block::get_hash_merkle_root() const {
     return _hash_merkle_root;
+}
+
+uint32_t block::get_n_time() const {
+    return _n_time;
+}
+
+uint32_t block::get_n_bits() const {
+    return _n_bits;
+}
+
+uint32_t block::get_n_nonce() const {
+    return _n_nonce;
+}
+
+const block::hash_type &block::get_hash_state_root() const {
+    return _hash_state_root;
+}
+
+const block::hash_type &block::get_hash_UTXO_root() const {
+    return _hash_UTXO_root;
 }
