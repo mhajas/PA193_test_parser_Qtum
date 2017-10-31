@@ -68,7 +68,18 @@ std::ostream& operator<<(std::ostream& os, const block& block1) {
     os << std::endl;
     os << "Hash UTXO root: ";
     for (auto it : block1._hash_UTXO_root) os << std::setfill('0') << std::setw(2) << std::hex << (int) it;
+    os << std::endl << std::endl;
+
+    os << "Proof-of-stake specific fields: " << std::endl;
+    os << "Hash prevout stake: ";
+    for (auto it : block1._hash_prevout_stake) os << std::setfill('0') << std::setw(2) << std::hex << (int) it;
     os << std::endl;
+    os << "Index n of prevout stake: " << block1._n_prevout_stake << std::endl;
+    os << "vch Block signature: " ;
+    for (auto it = block1._vch_block_sig.begin(); it != block1._vch_block_sig.end(); it++) os << std::setfill('0') << std::setw(2) << std::hex << (int) *it;
+    os << std::endl << std::endl;
+
+    os << "Number of transactions: " << (int) block1._number_of_transactions << std::endl;
 
     return os;
 }
@@ -122,6 +133,38 @@ std::istream& operator>>(std::istream& is, block& block1) {
         return is;
     }
 
+    if (parsing_utils::parse_reverse_bytes(is, static_cast<void*>(block1._hash_prevout_stake.data()), block1._hash_prevout_stake.size(), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+        std::cout << "Failed to read prevout stake hash" << std::endl;
+        is.setstate(std::ios::failbit);
+        return is;
+    }
+
+    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._n_prevout_stake), sizeof(block1._n_prevout_stake), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+        std::cout << "Failed to read index n of prevout stake" << std::endl;
+        is.setstate(std::ios::failbit);
+        return is;
+    }
+
+    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._vch_block_sig_size), sizeof(block1._vch_block_sig_size), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+        std::cout << "Failed to read size of block signature" << std::endl;
+        is.setstate(std::ios::failbit);
+        return is;
+    }
+
+    block1._vch_block_sig.resize(block1._vch_block_sig_size);
+
+    if (parsing_utils::parse_reverse_bytes(is, static_cast<void*>(&(block1._vch_block_sig[0])), block1._vch_block_sig_size, parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+        std::cout << "Failed to read vch block signature" << std::endl;
+        is.setstate(std::ios::failbit);
+        return is;
+    }
+
+    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._number_of_transactions), sizeof(block1._number_of_transactions), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+        std::cout << "Failed to read number of transactions" << std::endl;
+        is.setstate(std::ios::failbit);
+        return is;
+    }
+
     return is;
 }
 
@@ -161,4 +204,24 @@ const block::hash_type &block::get_hash_state_root() const {
 
 const block::hash_type &block::get_hash_UTXO_root() const {
     return _hash_UTXO_root;
+}
+
+const block::hash_type &block::get_hash_prevout_stake() const {
+    return _hash_prevout_stake;
+}
+
+uint32_t block::get_n_prevout_stake() const {
+    return _n_prevout_stake;
+}
+
+uint8_t block::get_vch_block_sig_size() const {
+    return _vch_block_sig_size;
+}
+
+const block::signature_type &block::get_vch_block_sig() const {
+    return _vch_block_sig;
+}
+
+uint8_t block::get_number_of_transactions() const {
+    return _number_of_transactions;
 }
