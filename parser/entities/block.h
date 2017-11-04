@@ -8,9 +8,11 @@
 
 #include <array>
 #include <ostream>
+#include <vector>
 
 class block {
     using hash_type = std::array<uint8_t, 32>;
+    using signature_type = std::vector<uint8_t>;
 
     uint32_t _version;
     hash_type _hash_prev_block;
@@ -22,6 +24,14 @@ class block {
 
     hash_type _hash_state_root;
     hash_type _hash_UTXO_root;
+
+    hash_type _hash_prevout_stake;
+    uint32_t _n_prevout_stake;
+
+    uint8_t _vch_block_sig_size;
+    signature_type _vch_block_sig;
+
+    uint8_t _number_of_transactions;
 
 public:
     block();
@@ -42,6 +52,16 @@ public:
     const hash_type& get_hash_state_root() const;
 
     const hash_type& get_hash_UTXO_root() const;
+
+    const hash_type& get_hash_prevout_stake() const;
+
+    uint32_t get_n_prevout_stake() const;
+
+    uint8_t get_vch_block_sig_size() const;
+
+    const signature_type& get_vch_block_sig() const;
+
+    uint8_t get_number_of_transactions() const;
 
 public:
     friend std::ostream& operator<<(std::ostream& os, const block& block1);
