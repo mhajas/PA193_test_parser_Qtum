@@ -7,6 +7,7 @@
 #include <vector>
 #include <algorithm>
 #include "block.h"
+#include "../external/crypto/sha256.h"
 
 namespace parsing_utils {
     enum RETURN_VALUE {SUCCESS, FAILURE};
@@ -76,7 +77,7 @@ std::ostream& operator<<(std::ostream& os, const block& block1) {
     os << std::endl;
     os << "Index n of prevout stake: " << block1._n_prevout_stake << std::endl;
     os << "vch Block signature: " ;
-    for (auto it = block1._vch_block_sig.begin(); it != block1._vch_block_sig.end(); it++) os << std::setfill('0') << std::setw(2) << std::hex << (int) *it;
+    for (auto it : block1._vch_block_sig) os << std::setfill('0') << std::setw(2) << std::hex << (int) it;
     os << std::endl << std::endl;
 
     os << "Number of transactions: " << (int) block1._number_of_transactions << std::endl;
@@ -85,10 +86,13 @@ std::ostream& operator<<(std::ostream& os, const block& block1) {
     os << "Version: " << (int) block1._n_version_coinbase << std::endl;
     os << "Index n: " << (int) block1._n_coinbase << std::endl;
     os << "CScript: " ;
-    for (auto it = block1._cscript_coinbase.begin(); it != block1._cscript_coinbase.end(); it++) os << std::setfill('0') << std::setw(2) << std::hex << (int) *it;
+    for (auto it : block1._cscript_coinbase) os << std::setfill('0') << std::setw(2) << std::hex << (int) it;
     os << std::endl << "N sequence: " << (int) block1._n_seq_coinbase << std::endl;
     os << "Script pub key: " ;
-    for (auto it = block1._script_pub_key_coinbase.begin(); it != block1._script_pub_key_coinbase.end(); it++) os << std::setfill('0') << std::setw(2) << std::hex << (int) *it;
+    for (auto it : block1._script_pub_key_coinbase) os << std::setfill('0') << std::setw(2) << std::hex << (int) it;
+    os << std::endl;
+    os << "Block Hash: " ;
+    for (auto it : block1.compute_hash()) os << std::setfill('0') << std::setw(2) << std::hex << (int) it;
     os << std::endl;
 
     return os;
@@ -298,4 +302,46 @@ const block::vector_type &block::get_vch_block_sig() const {
 
 uint8_t block::get_number_of_transactions() const {
     return _number_of_transactions;
+}
+
+template <typename T>
+void addIntegral(CSHA256& hasher, T number) {
+    int size = sizeof(T);
+    unsigned char cArray[size];
+
+    for (int i = 0; i < size; i++)
+        cArray[i] = (number >> (i * 8));
+
+    hasher.Write(cArray, size);
+}
+
+template <typename T, typename M = typename T::value_type>
+void addContainer(CSHA256& hasher, const T& container) {
+    std::vector<M> copy(std::begin(container), std::end(container));
+
+    std::reverse(std::begin(copy), std::end(copy));
+    hasher.Write(copy.data(), copy.size());
+}
+
+block::hash_type block::compute_hash() const {
+    CSHA256 hasher;
+
+    addIntegral(hasher, _version);
+    addContainer(hasher, _hash_prev_block);
+    addContainer(hasher, _hash_merkle_root);
+    addIntegral(hasher, _n_time);
+    addIntegral(hasher, _n_bits);
+    addIntegral(hasher, _n_nonce);
+    addContainer(hasher, _hash_state_root);
+    addContainer(hasher, _hash_UTXO_root);
+    addContainer(hasher, _hash_prevout_stake);
+    addIntegral(hasher, _n_prevout_stake);
+    addIntegral(hasher, _vch_block_sig_size);
+    addContainer(hasher, _vch_block_sig);
+
+    hash_type ret;
+    hasher.Finalize(ret.data());
+    hasher.Reset().Write(ret.data(), 32).Finalize(ret.data());
+
+    return ret;
 }
