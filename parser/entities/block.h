@@ -10,6 +10,8 @@
 #include <ostream>
 #include <vector>
 
+#include "transaction.h"
+
 class block {
     using hash_type = std::array<uint8_t, 32>;
     using vector_type = std::vector<uint8_t>;
@@ -25,8 +27,7 @@ class block {
     hash_type _hash_state_root;
     hash_type _hash_UTXO_root;
 
-    hash_type _hash_prevout_stake;
-    uint32_t _n_prevout_stake;
+    c_out_point _prevout_stake;
 
     uint8_t _vch_block_sig_size;
     vector_type _vch_block_sig;
@@ -34,17 +35,19 @@ class block {
     uint8_t _number_of_transactions;
 
     //First transaction - coin for miner
-    uint32_t _n_version_coinbase;
-    std::array<uint8_t, 35> _unknown_val_1;
-    uint32_t _n_coinbase;
-    uint8_t _cscript_size_coinbase;
-    vector_type _cscript_coinbase;
-    uint32_t _n_seq_coinbase;
-    std::array<uint8_t, 20> _unknown_val_2;
-    uint8_t _script_pub_key_size_coinbase;
-    vector_type _script_pub_key_coinbase;
-    std::array<uint8_t, 38> _unknown_val_3;
+    uint32_t _ft_version;
+    std::array<uint8_t, 41> _ft_unknown_val_1;
+    uint16_t _block_height; // sure this is height checked for other blocks
+    uint8_t _ft_unknown_val2; // maybe another byte of height, but it is weird to have 3 byte integer
+    uint32_t _ft_sequence; // just a guess
 
+    uint8_t _ft_ctxout_number;
+    std::vector<ctxout> _ft_ctxouts;
+    std::uint8_t _ft_number_of_unknown_sequences;
+    std::vector<std::vector<uint8_t>> _ft_unknown_sequences;
+    uint32_t _ft_n_time;
+
+    std::vector<transaction> _transactions;
 
 public:
     block();
@@ -66,9 +69,7 @@ public:
 
     const hash_type& get_hash_UTXO_root() const;
 
-    const hash_type& get_hash_prevout_stake() const;
-
-    uint32_t get_n_prevout_stake() const;
+    const c_out_point& get_prevout_stake() const;
 
     uint8_t get_vch_block_sig_size() const;
 
