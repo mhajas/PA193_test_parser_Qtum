@@ -76,6 +76,8 @@ public:
 
     uint8_t get_number_of_transactions() const;
 
+    hash_type compute_hash() const;
+
 public:
     friend std::ostream& operator<<(std::ostream& os, const block& block1);
     friend std::istream& operator>>(std::istream& is, block& block1);
