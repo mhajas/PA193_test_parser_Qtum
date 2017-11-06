@@ -49,9 +49,9 @@ TEST(parsing, correct_block_22380) {
                                                   0x6f, 0x65, 0x23, 0x74, 0xa7, 0xa4, 0xa2, 0xf3,
                                                   0x79, 0xec, 0x32, 0x10, 0x52, 0x47, 0x0c, 0x23,
                                                   0xc0, 0x78, 0xeb, 0x6c, 0xa0, 0x15, 0x3f, 0x8b};
-    EXPECT_EQ(hash_prevout_stake, b.get_hash_prevout_stake()) << "Hash prevout stake was not parsed correctly";
+    EXPECT_EQ(hash_prevout_stake, b.get_prevout_stake().get_hash()) << "Hash prevout stake was not parsed correctly";
 
-    EXPECT_EQ(1, b.get_n_prevout_stake()) << "Index n of prevout stake wasn't parsed correctly";
+    EXPECT_EQ(1,  b.get_prevout_stake().get_index_n()) << "Index n of prevout stake wasn't parsed correctly";
 
     std::vector<uint8_t> vch_block_signature =  {0xc4, 0xc6, 0x53, 0x39, 0xb0, 0x03, 0x4d, 0xe1,
                                                  0x09, 0xd7, 0x78, 0x5a, 0x24, 0xdc, 0xc5, 0x6d,
@@ -111,9 +111,9 @@ TEST(parsing, correct_block_22381) {
                                                   0x88, 0xbd, 0x68, 0xda, 0xfd, 0x60, 0x97, 0xcc,
                                                   0x4d, 0x6a, 0x6a, 0xc4, 0xe4, 0xf2, 0xfb, 0x81,
                                                   0x25, 0xc3, 0x1c, 0x17, 0x3d, 0xae, 0x81, 0xfd};
-    EXPECT_EQ(hash_prevout_stake, b.get_hash_prevout_stake()) << "Hash prevout stake was not parsed correctly";
+    EXPECT_EQ(hash_prevout_stake, b.get_prevout_stake().get_hash()) << "Hash prevout stake was not parsed correctly";
 
-    EXPECT_EQ(2, b.get_n_prevout_stake()) << "Index n of prevout stake wasn't parsed correctly";
+    EXPECT_EQ(2,  b.get_prevout_stake().get_index_n()) << "Index n of prevout stake wasn't parsed correctly";
 
     std::vector<uint8_t> vch_block_signature =  {0x83, 0x96, 0x7a, 0xec, 0x72, 0x92, 0x71, 0x5c,
                                                  0x84, 0x0b, 0x43, 0xfd, 0xd3, 0x94, 0xc1, 0xf2,
@@ -173,9 +173,9 @@ TEST(parsing, correct_block_22382) {
                                                   0x92, 0x43, 0xf6, 0xe8, 0xb4, 0xe7, 0xce, 0x66,
                                                   0x89, 0x42, 0x04, 0x91, 0x93, 0xc3, 0xf0, 0x1d,
                                                   0x0e, 0xf3, 0xf8, 0x47, 0xa7, 0xbd, 0xb7, 0x71};
-    EXPECT_EQ(hash_prevout_stake, b.get_hash_prevout_stake()) << "Hash prevout stake was not parsed correctly";
+    EXPECT_EQ(hash_prevout_stake, b.get_prevout_stake().get_hash()) << "Hash prevout stake was not parsed correctly";
 
-    EXPECT_EQ(2, b.get_n_prevout_stake()) << "Index n of prevout stake wasn't parsed correctly";
+    EXPECT_EQ(2,  b.get_prevout_stake().get_index_n()) << "Index n of prevout stake wasn't parsed correctly";
 
     std::vector<uint8_t> vch_block_signature =  {0xba, 0x1c, 0x7e, 0x78, 0x14, 0x8d, 0x8d, 0x84,
                                                  0x14, 0x62, 0x34, 0x63, 0x22, 0x86, 0xad, 0xde,
@@ -236,9 +236,9 @@ TEST(parsing, correct_block_22383) {
                                                   0xfc, 0x92, 0x65, 0x9c, 0x48, 0x0d, 0xb1, 0xc3,
                                                   0x82, 0xc5, 0x57, 0xb0, 0xc1, 0x14, 0xf6, 0xb5,
                                                   0xdd, 0xff, 0xfb, 0xfb, 0x30, 0x75, 0xd8, 0x70};
-    EXPECT_EQ(hash_prevout_stake, b.get_hash_prevout_stake()) << "Hash prevout stake was not parsed correctly";
+    EXPECT_EQ(hash_prevout_stake, b.get_prevout_stake().get_hash()) << "Hash prevout stake was not parsed correctly";
 
-    EXPECT_EQ(0, b.get_n_prevout_stake()) << "Index n of prevout stake wasn't parsed correctly";
+    EXPECT_EQ(0,  b.get_prevout_stake().get_index_n()) << "Index n of prevout stake wasn't parsed correctly";
 
     std::vector<uint8_t> vch_block_signature =  {0x1a, 0xcc, 0x56, 0x36, 0x33, 0x6f, 0xb2, 0x80,
                                                  0x16, 0xe9, 0x42, 0xc6, 0x21, 0xb5, 0x10, 0x90,
@@ -298,9 +298,9 @@ TEST(parsing, correct_block_22384) {
                                                   0x09, 0x84, 0xe9, 0xe9, 0x2e, 0x8c, 0xe6, 0x8b,
                                                   0xa9, 0xb3, 0xae, 0x62, 0x48, 0xbf, 0x0d, 0xf4,
                                                   0xe8, 0x3e, 0x9e, 0xa5, 0x04, 0xbc, 0x94, 0x7e};
-    EXPECT_EQ(hash_prevout_stake, b.get_hash_prevout_stake()) << "Hash prevout stake was not parsed correctly";
+    EXPECT_EQ(hash_prevout_stake, b.get_prevout_stake().get_hash()) << "Hash prevout stake was not parsed correctly";
 
-    EXPECT_EQ(1, b.get_n_prevout_stake()) << "Index n of prevout stake wasn't parsed correctly";
+    EXPECT_EQ(1,  b.get_prevout_stake().get_index_n()) << "Index n of prevout stake wasn't parsed correctly";
 
     std::vector<uint8_t> vch_block_signature =  {0x45, 0xe9, 0x1c, 0x32, 0x3c, 0xf2, 0xe1, 0xa6,
                                                  0xa7, 0x62, 0x5f, 0x7b, 0xc0, 0xbc, 0xd3, 0xb6,
@@ -360,9 +360,9 @@ TEST(parsing, correct_block_22385) {
                                                   0xd9, 0xe2, 0x24, 0x2b, 0xb6, 0xe8, 0x31, 0x45,
                                                   0xb1, 0xc5, 0x5e, 0x8d, 0xe4, 0x45, 0xc8, 0xa6,
                                                   0x88, 0x1e, 0x2b, 0x31, 0xa7, 0x0c, 0xcf, 0x39};
-    EXPECT_EQ(hash_prevout_stake, b.get_hash_prevout_stake()) << "Hash prevout stake was not parsed correctly";
+    EXPECT_EQ(hash_prevout_stake, b.get_prevout_stake().get_hash()) << "Hash prevout stake was not parsed correctly";
 
-    EXPECT_EQ(1, b.get_n_prevout_stake()) << "Index n of prevout stake wasn't parsed correctly";
+    EXPECT_EQ(1,  b.get_prevout_stake().get_index_n()) << "Index n of prevout stake wasn't parsed correctly";
 
     std::vector<uint8_t> vch_block_signature =  {0xe2, 0x8c, 0xfa, 0x23, 0xca, 0xec, 0xc7, 0xdf, 
                                                  0x02, 0xd4, 0x91, 0xad, 0x9e, 0x45, 0xa6, 0x24,

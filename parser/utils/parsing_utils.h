@@ -2,15 +2,17 @@
 // Created by mhajas on 11/6/17.
 //
 
-#ifndef PA193_QTUM_PARSER_PARSING_UTILS_H_H
-#define PA193_QTUM_PARSER_PARSING_UTILS_H_H
+#ifndef PA193_QTUM_PARSER_PARSING_UTILS_H
+#define PA193_QTUM_PARSER_PARSING_UTILS_H
+
 #include <iostream>
 #include <vector>
 #include <algorithm>
 
 namespace parsing_utils {
     enum RETURN_VALUE {SUCCESS, FAILURE};
-    bool is_big_endian()
+
+    inline bool is_big_endian()
     {
         union {
             uint32_t i;
@@ -20,7 +22,7 @@ namespace parsing_utils {
         return bint.c[0] == 1;
     }
 
-    RETURN_VALUE parse_bytes(std::istream& is, void* storage, size_t number_of_bytes, bool is_big_endian) {
+    inline RETURN_VALUE parse_bytes(std::istream& is, void* storage, size_t number_of_bytes, bool is_big_endian) {
         if (!is_big_endian) {
             is.read(static_cast<char*>(storage), number_of_bytes);
 
@@ -46,9 +48,9 @@ namespace parsing_utils {
         return SUCCESS;
     }
 
-    RETURN_VALUE parse_reverse_bytes(std::istream& is, void* storage, size_t number_of_bytes, bool is_big_endian) {
+    inline RETURN_VALUE parse_reverse_bytes(std::istream& is, void* storage, size_t number_of_bytes, bool is_big_endian) {
         return parse_bytes(is, storage, number_of_bytes, !is_big_endian);
     }
 
 }
-#endif //PA193_QTUM_PARSER_PARSING_UTILS_H_H
+#endif //PA193_QTUM_PARSER_PARSING_UTILS_H

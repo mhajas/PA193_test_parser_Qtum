@@ -194,7 +194,7 @@ std::istream& operator>>(std::istream& is, block& block1) {
 //        std::cout << "Failed to read unknown val 3" << std::endl;
 //        is.setstate(std::ios::failbit);
 //        return is;
-    }
+//    }
 
     return is;
 }

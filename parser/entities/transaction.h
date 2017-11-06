@@ -7,6 +7,7 @@
 
 #include <array>
 #include <vector>
+#include "../utils/parsing_utils.h"
 
 using hash_type = std::array<uint8_t, 32>;
 

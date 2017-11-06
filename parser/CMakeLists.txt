@@ -8,7 +8,8 @@ add_library(parser-lib STATIC
         external/crypto/sha256
         external/crypto/common.h
         utils/parsing_utils.h
-        )
+        external/crypto/endian.h
+        external/crypto/byteswap.h)
 
 target_include_directories(parser-lib INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/..
