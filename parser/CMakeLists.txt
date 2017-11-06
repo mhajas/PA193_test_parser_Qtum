@@ -7,6 +7,7 @@ add_library(parser-lib STATIC
         entities/transaction.cpp
         external/crypto/sha256
         external/crypto/common.h
+        utils/parsing_utils.h
         )
 
 target_include_directories(parser-lib INTERFACE
