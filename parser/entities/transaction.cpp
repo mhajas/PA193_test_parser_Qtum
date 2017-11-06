@@ -2,6 +2,7 @@
 // Created by charlliz on 3.11.2017.
 //
 #include "transaction.h"
+#include "../utils/parsing_utils.h"
 
 std::istream& operator>>(std::istream& is, transaction& t) {
     if (parsing_utils::parse_bytes(is, static_cast<void*>(&t._version), sizeof(t._version), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
