@@ -36,15 +36,18 @@ class block {
 
     //First transaction - coin for miner
     uint32_t _ft_version;
-    std::array<uint8_t, 43> _ft_unknown_val_1;
-    uint32_t _block_height; // sure this is height checked for other blocks
-    uint8_t _ft_unknown2_val; // maybe another byte of height, but it is weird to have 3 byte integer
+    std::array<uint8_t, 41> _ft_unknown_val_1;
+    uint16_t _block_height; // sure this is height checked for other blocks
+    uint8_t _ft_unknown_val2; // maybe another byte of height, but it is weird to have 3 byte integer
     uint32_t _ft_sequence; // just a guess
 
-    uint8_t _ft_out_scripts_size;
-    std::vector<c_script> _ft_out_scripts;
-    std::uint8_t _ft_number_of_unknows_sequences;
+    uint8_t _ft_ctxout_number;
+    std::vector<ctxout> _ft_ctxouts;
+    std::uint8_t _ft_number_of_unknown_sequences;
     std::vector<std::vector<uint8_t>> _ft_unknown_sequences;
+    uint32_t _ft_n_time;
+
+    std::vector<transaction> _transactions;
 
 public:
     block();

@@ -131,70 +131,97 @@ std::istream& operator>>(std::istream& is, block& block1) {
         return is;
     }
 
+    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._ft_version), sizeof(block1._ft_version), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+        std::cout << "Failed to read first transaction version" << std::endl;
+        is.setstate(std::ios::failbit);
+        return is;
+    }
 
-//    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._n_version_coinbase), sizeof(block1._n_version_coinbase), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
-//        std::cout << "Failed to read version of first transaction" << std::endl;
-//        is.setstate(std::ios::failbit);
-//        return is;
-//    }
-//
-//    if (parsing_utils::parse_reverse_bytes(is, static_cast<void*>(block1._unknown_val_1.data()), block1._unknown_val_1.size(), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
-//        std::cout << "Failed to read unknown val 1" << std::endl;
-//        is.setstate(std::ios::failbit);
-//        return is;
-//    }
-//
-//    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._n_coinbase), sizeof(block1._n_coinbase), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
-//        std::cout << "Failed to read index n of coinbase" << std::endl;
-//        is.setstate(std::ios::failbit);
-//        return is;
-//    }
-//
-//    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._cscript_size_coinbase), sizeof(block1._cscript_size_coinbase), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
-//        std::cout << "Failed to read size of cscript" << std::endl;
-//        is.setstate(std::ios::failbit);
-//        return is;
-//    }
-//
-//    block1._cscript_coinbase.resize(block1._cscript_size_coinbase);
-//
-//    if (parsing_utils::parse_bytes(is, static_cast<void*>(&(block1._cscript_coinbase[0])), block1._cscript_size_coinbase, parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
-//        std::cout << "Failed to read script of coinbase" << std::endl;
-//        is.setstate(std::ios::failbit);
-//        return is;
-//    }
-//
-//    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._n_seq_coinbase), sizeof(block1._n_seq_coinbase), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
-//        std::cout << "Failed to read n sequence of coinbase" << std::endl;
-//        is.setstate(std::ios::failbit);
-//        return is;
-//    }
-//
-//    if (parsing_utils::parse_reverse_bytes(is, static_cast<void*>(block1._unknown_val_2.data()), block1._unknown_val_2.size(), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
-//        std::cout << "Failed to read unknown val 2" << std::endl;
-//        is.setstate(std::ios::failbit);
-//        return is;
-//    }
-//
-//    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._script_pub_key_size_coinbase), sizeof(block1._script_pub_key_size_coinbase), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
-//        std::cout << "Failed to read size of script pub key" << std::endl;
-//        is.setstate(std::ios::failbit);
-//        return is;
-//    }
-//
-//    block1._script_pub_key_coinbase.resize(block1._script_pub_key_size_coinbase);
-//
-//    if (parsing_utils::parse_bytes(is, static_cast<void*>(&(block1._script_pub_key_coinbase[0])), block1._script_pub_key_size_coinbase, parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
-//        std::cout << "Failed to read script pub key of coinbase" << std::endl;
-//        is.setstate(std::ios::failbit);
-//        return is;
-//    }
-//
-//    if (parsing_utils::parse_reverse_bytes(is, static_cast<void*>(block1._unknown_val_3.data()), block1._unknown_val_3.size(), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
-//        std::cout << "Failed to read unknown val 3" << std::endl;
-//        is.setstate(std::ios::failbit);
-//        return is;
-//    }
+    if (parsing_utils::parse_reverse_bytes(is, static_cast<void*>(&(block1._ft_unknown_val_1[0])), block1._ft_unknown_val_1.size(), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+        std::cout << "Failed to read first transaction unknown val 1" << std::endl;
+        is.setstate(std::ios::failbit);
+        return is;
+    }
+
+    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._block_height), sizeof(block1._block_height), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+        std::cout << "Failed to read block height" << std::endl;
+        is.setstate(std::ios::failbit);
+        return is;
+    }
+
+    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._ft_unknown_val2), sizeof(block1._ft_unknown_val2), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+        std::cout << "Failed to read unknown value 2" << std::endl;
+        is.setstate(std::ios::failbit);
+        return is;
+    }
+
+    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._ft_sequence), sizeof(block1._ft_sequence), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+        std::cout << "Failed to read first transaction sequence" << std::endl;
+        is.setstate(std::ios::failbit);
+        return is;
+    }
+
+    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._ft_ctxout_number), sizeof(block1._ft_ctxout_number), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+        std::cout << "Failed to read first transaction number out contexts" << std::endl;
+        is.setstate(std::ios::failbit);
+        return is;
+    }
+
+    for (auto i = 0; i < block1._ft_ctxout_number; i++) {
+        ctxout out;
+
+        is >> out;
+
+        if (!is) {
+            std::cout << "Failed to read out context number: " << i << std::endl;
+        }
+
+        block1._ft_ctxouts.push_back(std::move(out));
+    }
+
+
+    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._ft_number_of_unknown_sequences), sizeof(block1._ft_number_of_unknown_sequences), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+        std::cout << "Failed to read first transaction out scripts number" << std::endl;
+        is.setstate(std::ios::failbit);
+        return is;
+    }
+
+    for (auto i = 0; i < block1._ft_number_of_unknown_sequences; i++) {
+        uint8_t size;
+        if (parsing_utils::parse_bytes(is, static_cast<void*>(&size), sizeof(size), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+            std::cout << "Failed to read size of unknown block number: " << i << std::endl;
+            is.setstate(std::ios::failbit);
+            return is;
+        }
+
+        std::vector<uint8_t> vector1(size);
+
+        if (parsing_utils::parse_bytes(is, static_cast<void*>(vector1.data()), size, parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+            std::cout << "Failed to read unknown block number: " << i << std::endl;
+            is.setstate(std::ios::failbit);
+            return is;
+        }
+
+        block1._ft_unknown_sequences.push_back(std::move(vector1));
+    }
+
+    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._ft_n_time), sizeof(block1._ft_n_time), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+        std::cout << "Failed to read first transaction out scripts number" << std::endl;
+        is.setstate(std::ios::failbit);
+        return is;
+    }
+
+    for (auto i = 0; i < block1._number_of_transactions - 1; i++) {
+        transaction t;
+        is >> t;
+
+        if (!is) {
+            std::cout << "Failed to read transaction number: " << i << std::endl;
+            return is;
+        }
+
+        block1._transactions.push_back(std::move(t));
+    }
 
     return is;
 }

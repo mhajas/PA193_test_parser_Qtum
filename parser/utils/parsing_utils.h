@@ -23,6 +23,7 @@ namespace parsing_utils {
     }
 
     inline RETURN_VALUE parse_bytes(std::istream& is, void* storage, size_t number_of_bytes, bool is_big_endian) {
+        if (number_of_bytes == 0) return SUCCESS;
         if (!is_big_endian) {
             is.read(static_cast<char*>(storage), number_of_bytes);
 

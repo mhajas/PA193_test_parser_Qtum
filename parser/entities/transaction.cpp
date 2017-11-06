@@ -36,7 +36,7 @@ std::istream& operator>>(std::istream& is, transaction& t) {
         return is;
     }
 
-    for (auto i = 0; i < t._vin_count; i++) {
+    for (auto i = 0; i < t._vout_count; i++) {
         ctxout outTransaction;
         is >> outTransaction;
 
@@ -131,7 +131,7 @@ std::istream& operator>>(std::istream& is, c_script& script) {
         return is;
     }
 
-    auto after_flag_number = script._size - (script._storage_size + 1 + script._after_flags.size());
+    auto after_flag_number = script._size - (script._storage_size + 1 + script._before_flags.size());
     uint8_t flag;
     for (auto i = 0; i < after_flag_number; i++) {
         if(parsing_utils::parse_bytes(is, static_cast<void*>(&flag), sizeof(flag),
