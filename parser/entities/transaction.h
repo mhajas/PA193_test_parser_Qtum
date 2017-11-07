@@ -38,6 +38,12 @@ struct c_script{
 public:
     friend std::ostream& operator<<(std::ostream& os, const c_script& script);
     friend std::istream& operator>>(std::istream& is, c_script& script);
+
+    uint8_t get_size();
+    std::vector<uint8_t> get_before_flags();
+    uint8_t get_storage_size();
+    std::vector<uint8_t> get_storage();
+    std::vector<uint8_t> get_after_flags();
 };
 
 struct ctxin {
@@ -48,6 +54,10 @@ struct ctxin {
 public:
     friend std::ostream& operator<<(std::ostream& os, const ctxin& in);
     friend std::istream& operator>>(std::istream& is, ctxin& in);
+
+    c_out_point get_prevout();
+    c_script get_pub_key_script();
+    uint32_t get_sequence();
 };
 
 struct ctxout {
@@ -57,10 +67,12 @@ struct ctxout {
 public:
     friend std::ostream& operator<<(std::ostream& os, const ctxout& out);
     friend std::istream& operator>>(std::istream& is, ctxout& out);
+
+    int64_t get_amount();
+    c_script get_pub_key_script();
 };
 
 class transaction {
-
     uint32_t _version;
     uint8_t _vin_count;
     std::vector<ctxin> _vin;
@@ -72,6 +84,12 @@ public:
     friend std::ostream& operator<<(std::ostream& os, const transaction& t);
     friend std::istream& operator>>(std::istream& is, transaction& t);
 
+    uint32_t get_version();
+    uint8_t get_vin_count();
+    std::vector<ctxin> get_vin();
+    uint8_t get_vout_count();
+    std::vector<ctxout> get_vout();
+    uint32_t get_lock_time();
 };
 
 #endif //PA193_QTUM_PARSER_TRANSACTION_H
