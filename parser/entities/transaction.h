@@ -69,6 +69,9 @@ class transaction {
     uint32_t _lock_time;
 
 public:
+    hash_type compute_hash() const;
+
+public:
     friend std::ostream& operator<<(std::ostream& os, const transaction& t);
     friend std::istream& operator>>(std::istream& is, transaction& t);
 

@@ -4,15 +4,21 @@
 #include "transaction.h"
 #include <iomanip>
 #include "../utils/parsing_utils.h"
+#include "../external/crypto/sha256.h"
+#include "../utils/hash_utils.h"
 
 std::ostream& operator<<(std::ostream& os, const transaction& t){
 
     os << "Version: " << t._version << std::endl;
+
     os << "Input" << std::endl;
     for (auto it : t._vin) os << it;
     os << "Output" << std::endl;
     for (auto it : t._vout) os << it;
-    os << "Lock time: " << t._lock_time << std::endl << std::endl;
+    os << "Lock time: " << t._lock_time << std::endl;
+    os << "Transaction hash: ";
+    for (auto it : t.compute_hash()) os << std::setfill('0') << std::setw(2) << std::hex << (int) it;
+    os << std::endl << std::endl;
 
     return os;
 }
@@ -76,6 +82,61 @@ std::ostream& operator<<(std::ostream& os, const ctxin& in){
     os << "nSequence: " << in._sequence << std::endl;
 
     return os;
+}
+
+hash_type transaction::compute_hash() const {
+    CSHA256 hasher;
+    hash_utils::addIntegral(hasher, _version);
+
+    hash_utils::addIntegral(hasher, _vin_count);
+    for(auto it : _vin) {
+
+        hash_utils::addContainer(hasher, it._prevout.get_hash());
+        hash_utils::addIntegral(hasher, it._prevout.get_index_n());
+
+
+        hash_utils::addIntegral(hasher, it._pub_key_script._size);
+        for(auto before_script : it._pub_key_script._before_flags) {
+            hash_utils::addIntegral(hasher, before_script);
+        }
+
+        hash_utils::addIntegral(hasher, it._pub_key_script._storage_size);
+        hash_utils::addContainer(hasher, it._pub_key_script._storage);
+
+        for(auto after_script : it._pub_key_script._after_flags) {
+            hash_utils::addIntegral(hasher, after_script);
+        }
+
+        hash_utils::addIntegral(hasher, it._sequence);
+    }
+
+    hash_utils::addIntegral(hasher, _vout_count);
+    for(auto it : _vout) {
+        hash_utils::addIntegral(hasher, it._amount);
+
+
+        hash_utils::addIntegral(hasher, it._pub_key_script._size);
+
+        if (it._pub_key_script._size != 0) {
+            for (auto before_script : it._pub_key_script._before_flags) {
+                hash_utils::addIntegral(hasher, before_script);
+            }
+
+            hash_utils::addIntegral(hasher, it._pub_key_script._storage_size);
+            hash_utils::addContainer(hasher, it._pub_key_script._storage);
+
+            for (auto after_script : it._pub_key_script._after_flags) {
+                hash_utils::addIntegral(hasher, after_script);
+            }
+        }
+    }
+
+    hash_utils::addIntegral(hasher, _lock_time);
+
+    hash_type ret;
+    hasher.doubleHashFinalize(ret.data());
+
+    return ret;
 }
 
 std::istream& operator>>(std::istream& is, ctxin& in) {

@@ -45,7 +45,7 @@ class block {
     std::vector<ctxout> _ft_ctxouts;
     std::uint8_t _ft_number_of_unknown_sequences;
     std::vector<std::vector<uint8_t>> _ft_unknown_sequences;
-    uint32_t _ft_n_time;
+    uint32_t _ft_lock_time;
 
     std::vector<transaction> _transactions;
 
@@ -78,6 +78,8 @@ public:
     uint8_t get_number_of_transactions() const;
 
     hash_type compute_hash() const;
+    hash_type compute_first_transaction_hash() const;
+    hash_type compute_merkle_root() const;
 
 public:
     friend std::ostream& operator<<(std::ostream& os, const block& block1);
