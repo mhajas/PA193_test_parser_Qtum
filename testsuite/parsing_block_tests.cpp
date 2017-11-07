@@ -64,7 +64,83 @@ TEST(parsing, correct_block_22380) {
                                                  0x2e, 0xc4, 0x00, 0x21, 0x02, 0x45, 0x30};
     EXPECT_EQ(vch_block_signature, b.get_vch_block_sig()) << "Block signature was not parsed correctly";
 
+    EXPECT_EQ(71, b.get_vch_block_sig_size()) << "Block signature size wasn't parsed correctly";
+
     EXPECT_EQ(2, b.get_number_of_transactions()) << "Number of transactions wasn't parsed correctly";
+
+    //test first transaction
+    EXPECT_EQ(2, b.get_ft_version()) << "First transaction version wasn't parsed correctly";
+
+    EXPECT_EQ(22380, b.get_block_height()) << "First transaction height wasn't parsed correctly";
+
+    EXPECT_EQ(4294967295, b.get_ft_sequence()) << "First transaction sequence wasn't parsed correctly";
+
+    auto co = b.get_ft_ctxouts();
+    auto ctxout = co.begin();
+
+    EXPECT_EQ(0, ctxout.base()->get_amount()) << "First transaction ctxout amount (0) wasn't parsed correctly";
+
+    ctxout++;
+    EXPECT_EQ(0, ctxout.base()->get_amount()) << "First transaction ctxout amount (1) wasn't parsed correctly";
+
+    ctxout++;
+    EXPECT_EQ(ctxout, co.end()) << "First transaction number of ctxouts wasn't parsed correctly";
+
+    EXPECT_EQ(2, b.get_ft_ctxout_number()) << "First transaction ctxout number wasn't parsed correctly";
+
+    EXPECT_EQ(0, b.get_ft_n_time()) << "First transaction time number wasn't parsed correctly";
+
+    //test second transaction
+    auto ts = b.get_transactions();
+    auto t = ts.begin();
+
+    EXPECT_EQ(2, t.base()->get_version()) << "Second transaction version wasn't parsed correctly";
+
+    EXPECT_EQ(0, t.base()->get_lock_time()) << "Second transaction lock time wasn't parsed correctly";
+
+    EXPECT_EQ(1, t.base()->get_vin_count()) << "Second transaction vin count wasn't parsed correctly";
+
+    auto vins = t.base()->get_vin();
+    auto vin = vins.begin();
+
+    EXPECT_EQ(4294967295, vin.base()->get_sequence()) << "Second transaction sequence wasn't parsed correctly";
+
+    auto vin_script = vin.base()->get_pub_key_script();
+
+    EXPECT_EQ(72, vin_script.get_size()) << "Second transaction c_script size wasn't parsed correctly";
+
+    EXPECT_EQ(71, vin_script.get_storage_size()) << "Second transaction c_script storage size wasn't parsed correctly";
+
+    //add checking vin_script flags and storage
+
+    auto prevout = vin.base()->get_prevout();
+
+    EXPECT_EQ(1, prevout.get_index_n()) << "Second transaction prevout index n wasn't parsed correctly";
+
+    EXPECT_EQ(hash_prevout_stake, prevout.get_hash())<< "Second transaction prevout hash size wasn't parsed correctly";
+
+    vin++;
+    EXPECT_EQ(vin, vins.end()) << "Second transaction number of vins wasn't parsed correctly";
+
+    EXPECT_EQ(11, t.base()->get_vout_count()) << "Second transaction vout count wasn't parsed correctly";
+
+    auto vouts = t.base()->get_vout();
+    auto vout = vouts.begin();
+    auto vout_script = vout.base()->get_pub_key_script();
+
+    EXPECT_EQ(0, vout_script.get_size()) << "Second transaction c_script size wasn't parsed correctly";
+
+    EXPECT_EQ(192, vout_script.get_storage_size()) << "Second transaction c_script storage size wasn't parsed correctly";
+
+    //add checking vout_script flags and storage
+
+    EXPECT_EQ(0, vout.base()->get_amount()) << "Second transaction vout (0) amount wasn't parsed correctly";
+
+    vout = vout + 11; //add checking the others vouts
+    EXPECT_EQ(vout, vouts.end()) << "Second transaction number of vouts wasn't parsed correctly";
+
+    t++;
+    EXPECT_EQ(t++, ts.end()) << "Num transactions wasn't parse correctly";
 }
 
 TEST(parsing, correct_block_22381) {
