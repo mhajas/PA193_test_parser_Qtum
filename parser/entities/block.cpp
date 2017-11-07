@@ -9,6 +9,7 @@
 #include "block.h"
 #include "../external/crypto/sha256.h"
 #include "../utils/parsing_utils.h"
+#include "../utils/hash_utils.h"
 
 std::ostream& operator<<(std::ostream& os, const block& block1) {
     os << "Version: " << block1._version << std::endl;
@@ -45,10 +46,15 @@ std::ostream& operator<<(std::ostream& os, const block& block1) {
     os << "Height: " << std::dec << block1._block_height << std::endl;
     os << "CScript " << std::endl;
     for (auto it : block1._ft_ctxouts) os << it;
-    os << "Time: " << block1._ft_n_time << std::endl;
+    os << "Time: " << block1._ft_lock_time << std::endl;
+    os << "Transaction hash: ";
+    for (auto it : block1.compute_first_transaction_hash()) os << std::setfill('0') << std::setw(2) << std::hex << (int) it;
     os << std::endl;
 
-    for (auto it : block1._transactions) os << it;
+    int i = 2;
+    for (auto it : block1._transactions) {
+        os << "Transaction number " << i++ << ":" << std::endl << it;
+    }
 
     os << "Block Hash: " ;
     for (auto it : block1.compute_hash()) os << std::setfill('0') << std::setw(2) << std::hex << (int) it;
@@ -206,7 +212,7 @@ std::istream& operator>>(std::istream& is, block& block1) {
         block1._ft_unknown_sequences.push_back(std::move(vector1));
     }
 
-    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._ft_n_time), sizeof(block1._ft_n_time), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._ft_lock_time), sizeof(block1._ft_lock_time), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
         std::cout << "Failed to read first transaction out scripts number" << std::endl;
         is.setstate(std::ios::failbit);
         return is;
@@ -281,40 +287,62 @@ uint8_t block::get_number_of_transactions() const {
     return _number_of_transactions;
 }
 
-template <typename T>
-void addIntegral(CSHA256& hasher, T number) {
-    int size = sizeof(T);
-    unsigned char cArray[size];
-
-    for (int i = 0; i < size; i++)
-        cArray[i] = (number >> (i * 8));
-
-    hasher.Write(cArray, size);
-}
-
-template <typename T, typename M = typename T::value_type>
-void addContainer(CSHA256& hasher, const T& container) {
-    std::vector<M> copy(std::begin(container), std::end(container));
-
-    std::reverse(std::begin(copy), std::end(copy));
-    hasher.Write(copy.data(), copy.size());
-}
-
 block::hash_type block::compute_hash() const {
     CSHA256 hasher;
 
-    addIntegral(hasher, _version);
-    addContainer(hasher, _hash_prev_block);
-    addContainer(hasher, _hash_merkle_root);
-    addIntegral(hasher, _n_time);
-    addIntegral(hasher, _n_bits);
-    addIntegral(hasher, _n_nonce);
-    addContainer(hasher, _hash_state_root);
-    addContainer(hasher, _hash_UTXO_root);
-    addContainer(hasher, _prevout_stake.get_hash());
-    addIntegral(hasher, _prevout_stake.get_index_n());
-    addIntegral(hasher, _vch_block_sig_size);
-    addContainer(hasher, _vch_block_sig);
+    hash_utils::addIntegral(hasher, _version);
+    hash_utils::addContainer(hasher, _hash_prev_block);
+    hash_utils::addContainer(hasher, _hash_merkle_root);
+    hash_utils::addIntegral(hasher, _n_time);
+    hash_utils::addIntegral(hasher, _n_bits);
+    hash_utils::addIntegral(hasher, _n_nonce);
+    hash_utils::addContainer(hasher, _hash_state_root);
+    hash_utils::addContainer(hasher, _hash_UTXO_root);
+    hash_utils::addContainer(hasher, _prevout_stake.get_hash());
+    hash_utils::addIntegral(hasher, _prevout_stake.get_index_n());
+    hash_utils::addIntegral(hasher, _vch_block_sig_size);
+    hash_utils::addContainer(hasher, _vch_block_sig);
+
+    hash_type ret;
+    hasher.Finalize(ret.data());
+    hasher.Reset().Write(ret.data(), 32).Finalize(ret.data());
+
+    return ret;
+}
+
+hash_type block::compute_first_transaction_hash() const {
+    CSHA256 hasher;
+    hash_utils::addIntegral(hasher, _ft_version);
+
+    std::vector<uint8_t > newVec(_ft_unknown_val_1.begin(), _ft_unknown_val_1.end() - 2);
+
+    hash_utils::addContainer(hasher, newVec);
+    hash_utils::addIntegral(hasher, _block_height);
+    hash_utils::addIntegral(hasher, _ft_unknown_val2);
+    hash_utils::addIntegral(hasher, _ft_sequence);
+
+    hash_utils::addIntegral(hasher, _ft_ctxout_number);
+    for(auto it : _ft_ctxouts) {
+        hash_utils::addIntegral(hasher, it._amount);
+
+
+        hash_utils::addIntegral(hasher, it._pub_key_script._size);
+
+        if (it._pub_key_script._size != 0) {
+            for (auto before_script : it._pub_key_script._before_flags) {
+                hash_utils::addIntegral(hasher, before_script);
+            }
+
+            hash_utils::addIntegral(hasher, it._pub_key_script._storage_size);
+            hash_utils::addContainer(hasher, it._pub_key_script._storage);
+
+            for (auto after_script : it._pub_key_script._after_flags) {
+                hash_utils::addIntegral(hasher, after_script);
+            }
+        }
+    }
+
+    hash_utils::addIntegral(hasher, _ft_lock_time);
 
     hash_type ret;
     hasher.Finalize(ret.data());
