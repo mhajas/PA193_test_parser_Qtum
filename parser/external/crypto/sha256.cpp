@@ -188,3 +188,10 @@ CSHA256& CSHA256::Reset()
     sha256::Initialize(s);
     return *this;
 }
+
+void CSHA256::doubleHashFinalize(unsigned char hash[OUTPUT_SIZE]) {
+    Finalize(hash);
+    Reset();
+    Write(hash, OUTPUT_SIZE);
+    Finalize(hash);
+}
