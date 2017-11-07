@@ -38,17 +38,18 @@ std::ostream& operator<<(std::ostream& os, const block& block1) {
     for (auto it : block1._vch_block_sig) os << std::setfill('0') << std::setw(2) << std::hex << (int) it;
     os << std::endl << std::endl;
 
-    os << "Number of transactions: " << (int) block1._number_of_transactions << std::endl;
+    os << "Number of transactions: " << (int) block1._number_of_transactions << std::endl << std::endl;
 
-//    os << "First transaction" << std::endl;
-//    os << "Version: " << (int) block1._n_version_coinbase << std::endl;
-//    os << "Index n: " << (int) block1._n_coinbase << std::endl;
-//    os << "CScript: " ;
-//    for (auto it : block1._cscript_coinbase) os << std::setfill('0') << std::setw(2) << std::hex << (int) it;
-//    os << std::endl << "N sequence: " << (int) block1._n_seq_coinbase << std::endl;
-//    os << "Script pub key: " ;
-//    for (auto it : block1._script_pub_key_coinbase) os << std::setfill('0') << std::setw(2) << std::hex << (int) it;
-//    os << std::endl;
+    os  << "First transaction (coin for miner)" << std::endl;
+    os << "Version: " << (int) block1._ft_version << std::endl;
+    os << "Height: " << std::dec << block1._block_height << std::endl;
+    os << "CScript " << std::endl;
+    for (auto it : block1._ft_ctxouts) os << it;
+    os << "Time: " << block1._ft_n_time << std::endl;
+    os << std::endl;
+
+    for (auto it : block1._transactions) os << it;
+
     os << "Block Hash: " ;
     for (auto it : block1.compute_hash()) os << std::setfill('0') << std::setw(2) << std::hex << (int) it;
     os << std::endl;

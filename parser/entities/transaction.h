@@ -24,6 +24,7 @@ struct c_out_point{
     }
 
 public:
+    friend std::ostream& operator<<(std::ostream& os, const c_out_point& out_point);
     friend std::istream& operator>>(std::istream& is, c_out_point& out_point);
 };
 
@@ -35,6 +36,7 @@ struct c_script{
     std::vector<uint8_t> _after_flags;
 
 public:
+    friend std::ostream& operator<<(std::ostream& os, const c_script& script);
     friend std::istream& operator>>(std::istream& is, c_script& script);
 };
 
@@ -44,6 +46,7 @@ struct ctxin {
     uint32_t _sequence;
 
 public:
+    friend std::ostream& operator<<(std::ostream& os, const ctxin& in);
     friend std::istream& operator>>(std::istream& is, ctxin& in);
 };
 
@@ -52,6 +55,7 @@ struct ctxout {
     c_script _pub_key_script;
 
 public:
+    friend std::ostream& operator<<(std::ostream& os, const ctxout& out);
     friend std::istream& operator>>(std::istream& is, ctxout& out);
 };
 
@@ -65,6 +69,7 @@ class transaction {
     uint32_t _lock_time;
 
 public:
+    friend std::ostream& operator<<(std::ostream& os, const transaction& t);
     friend std::istream& operator>>(std::istream& is, transaction& t);
 
 };

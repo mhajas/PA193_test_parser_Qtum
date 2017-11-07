@@ -2,7 +2,20 @@
 // Created by charlliz on 3.11.2017.
 //
 #include "transaction.h"
+#include <iomanip>
 #include "../utils/parsing_utils.h"
+
+std::ostream& operator<<(std::ostream& os, const transaction& t){
+
+    os << "Version: " << t._version << std::endl;
+    os << "Input" << std::endl;
+    for (auto it : t._vin) os << it;
+    os << "Output" << std::endl;
+    for (auto it : t._vout) os << it;
+    os << "Lock time: " << t._lock_time << std::endl << std::endl;
+
+    return os;
+}
 
 std::istream& operator>>(std::istream& is, transaction& t) {
     if (parsing_utils::parse_bytes(is, static_cast<void*>(&t._version), sizeof(t._version), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
@@ -56,6 +69,15 @@ std::istream& operator>>(std::istream& is, transaction& t) {
     return is;
 }
 
+std::ostream& operator<<(std::ostream& os, const ctxin& in){
+    os << "Prevout " << std::endl;
+    os << in._prevout;
+    os << "scriptPubKey: " << in._pub_key_script;
+    os << "nSequence: " << in._sequence << std::endl;
+
+    return os;
+}
+
 std::istream& operator>>(std::istream& is, ctxin& in) {
     is >> in._prevout;
     if (!is) {
@@ -78,6 +100,15 @@ std::istream& operator>>(std::istream& is, ctxin& in) {
     return is;
 }
 
+std::ostream& operator<<(std::ostream& os, const c_out_point& out_point){
+    os << "Hash: " ;
+    for (auto it : out_point._hash) os << std::setfill('0') << std::setw(2) << std::hex << (int) it;
+    os << std::endl << "Index n: ";
+    os << out_point._index_n << std::endl;
+
+    return os;
+}
+
 std::istream& operator>>(std::istream& is, c_out_point& out_point) {
     if (parsing_utils::parse_reverse_bytes(is, static_cast<void*>(out_point._hash.data()), out_point._hash.size(), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
         std::cout << "Failed to read hash of previous block" << std::endl;
@@ -92,6 +123,18 @@ std::istream& operator>>(std::istream& is, c_out_point& out_point) {
     }
 
     return is;
+}
+
+std::ostream& operator<<(std::ostream& os, const c_script& script){
+    for (auto it : script._before_flags) os << std::setfill('0') << std::setw(2) << std::hex << (int) it << " ";
+
+    for (auto it : script._storage) os << std::setfill('0') << std::setw(2) << std::hex << (int) it;
+    os << " ";
+
+    for (auto it : script._after_flags) os << std::setfill('0') << std::setw(2) << std::hex << (int) it << " ";
+    os << std::endl;
+
+    return os;
 }
 
 std::istream& operator>>(std::istream& is, c_script& script) {
@@ -145,6 +188,14 @@ std::istream& operator>>(std::istream& is, c_script& script) {
     }
 
     return is;
+}
+
+std::ostream& operator<<(std::ostream& os, const ctxout& out){
+    auto amount = out._amount / 100000000 + 0.00000001 * (out._amount % 100000000);
+    os << "Amount: " << std::dec << amount << " QTUM" << std::endl;
+    os << "scriptPubKey: " << out._pub_key_script ;
+
+    return os;
 }
 
 std::istream& operator>>(std::istream& is, ctxout& out) {
