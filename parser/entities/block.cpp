@@ -308,6 +308,7 @@ block::hash_type block::compute_hash() const {
     hash_type ret;
     hasher.doubleHashFinalize(ret.data());
 
+    std::reverse(std::begin(ret), std::end(ret));
     return ret;
 }
 
@@ -374,6 +375,8 @@ hash_type block::compute_merkle_root() const {
             hasher.Reset();
         }
     }
+
+    std::reverse(std::begin(hashes.at(0)), std::end(hashes.at(0)));
 
     return hashes.at(0);
 }

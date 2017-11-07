@@ -9,7 +9,7 @@
 
 using json = nlohmann::json;
 
-static unsigned char hex2char(char input) {
+inline unsigned char hex2char(char input) {
     if (input >= '0' && input <= '9')
         return input - '0';
     if (input >= 'A' && input <= 'F')
@@ -20,88 +20,51 @@ static unsigned char hex2char(char input) {
 
 }
 
-static void hex_string2string(std::string& str) {
-    assert(str.length()  % 2 == 0);
+inline std::string hex_reduction(std::string &&str) {
+    assert(str.size()  % 2 == 0);
 
     for (uint32_t i = 0; i < str.size() / 2; i++) {
         str[i] = (hex2char(str.at(2 * i)) << 4) + hex2char(str.at(2 * i + 1));
     }
 
-    str.resize(str.length()/2);
+    str.resize(str.size()/2);
+
+    return str;
 }
 
-int compare_hashes(hash_type hash, std::string hash_j, bool rev) {
-    hex_string2string(hash_j);
-    if (rev) {
-        std::reverse(hash_j.begin(), hash_j.end());
-    }
+template <typename T>
+inline hash_type to_array(T&& str) {
+    assert(str.size() == 32);
 
-    for (int it = 0; it < 32; it++) {
-        if (hash[it] != (uint8_t) hash_j[it]) {
-            //printf("%d %x %x\n", it, hash[it], hash_j[it]);
-            return -1;
-        }
-    }
-    return 0;
+    hash_type a;
+    std::copy(std::begin(str), std::end(str), a.data());
+
+    return a;
 }
 
-int compare_bin_json(std::string bin_path, const char* json_path) {
+void compare_bin_json(int block_number) {
     //read bin file
-    std::ifstream block_bin_file(bin_path, std::ios::binary);
+    std::ifstream block_bin_file("resources/test-resources/blocks/" + std::to_string(block_number) + ".bin", std::ios::binary);
     if (!block_bin_file) {
-        return -1;
+        FAIL() << "Can't open binary file: " << std::to_string(block_number) << ".bin";
     }
-
     block b(block_bin_file);
 
-    std::ifstream json_file(json_path);
+    std::ifstream json_file("resources/test-resources/blocks/" + std::to_string(block_number) + ".json");
     if (!json_file) {
-        return -1;
+        FAIL() << "Can't open json file: " << std::to_string(block_number) << ".json";
     }
-    json j;
-    json_file >> j;
-
-    //compare hash
-    hash_type hash = b.compute_hash();
-
-    std::string hash_j = j.at("hash");
-
-    if (compare_hashes(hash, hash_j, true) != 0) return -2;
-
-    //compare version
-    uint32_t b_version = b.get_version();
-
-    uint32_t j_version = j.at("version");
-
-    if (b_version != j_version) {
-        return -3;
-    }
-
-    //compare merkle root
-    hash_type hash_merkle_root = b.get_hash_merkle_root();
-
-    std::string j_hash_merkle_root = j.at("merkleroot");
-
-    if (compare_hashes(hash_merkle_root, j_hash_merkle_root, false) != 0) return -2;
-
-    //compare hash state root
-    hash_type hash_state_root = b.get_hash_state_root();
-
-    std::string j_hash_state_root = j.at("hashStateRoot");
-
-    if (compare_hashes(hash_state_root, j_hash_state_root, false) != 0) return -3;
+    json j = json::parse(json_file);
 
 
-    //compare hash UTXO root
-    hash_type hash_UTXO_root = b.get_hash_UTXO_root();
-
-    std::string j_hash_UTXO_root = j.at("hashUTXORoot");
-
-    if (compare_hashes(hash_UTXO_root, j_hash_UTXO_root, false) != 0) return -3;
-
-
-    return 0;
+    EXPECT_EQ(b.compute_hash(), to_array(hex_reduction(j.at("hash")))) << "Hashes are different for block: " << block_number;
+    EXPECT_EQ(b.get_version(), j.at("version"));
+    EXPECT_EQ(b.get_hash_merkle_root(), to_array(hex_reduction(j.at("merkleroot")))) << "Parsed merkle root is different for block: " << block_number;
+    EXPECT_EQ(b.compute_merkle_root(), to_array(hex_reduction(j.at("merkleroot")))) << "Computed merkle root is different for block: " << block_number;
+    EXPECT_EQ(b.get_hash_state_root(), to_array(hex_reduction(j.at("hashStateRoot")))) << "HashStateRoot is different for block " << block_number;
+    EXPECT_EQ(b.get_hash_UTXO_root(), to_array(hex_reduction(j.at("hashUTXORoot")))) << "HashStateRoot is different for block " << block_number;
 }
+
 TEST(parsing, correct_block_22380_json) {
-    EXPECT_EQ(0, compare_bin_json("resources/test-resources/blocks/22380.bin", "resources/test-resources/blocks/22380.json"));
+    compare_bin_json(22380);
 }

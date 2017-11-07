@@ -11,7 +11,10 @@ enable_testing()
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
 add_executable(testsuite test-main.cpp
-        parsing_block_tests.cpp)
+        parsing_block_tests.cpp
+        parse_test_json.cpp
+        external/json.hpp
+        )
 
 target_link_libraries(testsuite gtest gtest_main parser-lib)
 
