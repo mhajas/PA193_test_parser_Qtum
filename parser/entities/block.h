@@ -79,6 +79,7 @@ public:
 
     hash_type compute_hash() const;
     hash_type compute_first_transaction_hash() const;
+    hash_type compute_merkle_root() const;
 
 public:
     friend std::ostream& operator<<(std::ostream& os, const block& block1);

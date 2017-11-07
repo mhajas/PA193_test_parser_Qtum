@@ -134,8 +134,7 @@ hash_type transaction::compute_hash() const {
     hash_utils::addIntegral(hasher, _lock_time);
 
     hash_type ret;
-    hasher.Finalize(ret.data());
-    hasher.Reset().Write(ret.data(), 32).Finalize(ret.data());
+    hasher.doubleHashFinalize(ret.data());
 
     return ret;
 }

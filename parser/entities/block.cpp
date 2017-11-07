@@ -17,8 +17,10 @@ std::ostream& operator<<(std::ostream& os, const block& block1) {
     for (auto it : block1._hash_prev_block) os << std::setfill('0') << std::setw(2) << std::hex << (int) it;
     os << std::endl << "Merkle root: ";
     for (auto it : block1._hash_merkle_root) os << std::setfill('0') << std::setw(2) << std::hex << (int) it;
-
+    os << std::endl << "Computed Merkle root: ";
+    for (auto it : block1.compute_merkle_root()) os << std::setfill('0') << std::setw(2) << std::hex << (int) it;
     os << std::endl;
+
     os << "nTime: " << block1._n_time << std::endl;
     os << "nBits: " << block1._n_bits << std::endl;
     os << "nNonce: " << block1._n_nonce << std::endl;
@@ -304,8 +306,7 @@ block::hash_type block::compute_hash() const {
     hash_utils::addContainer(hasher, _vch_block_sig);
 
     hash_type ret;
-    hasher.Finalize(ret.data());
-    hasher.Reset().Write(ret.data(), 32).Finalize(ret.data());
+    hasher.doubleHashFinalize(ret.data());
 
     return ret;
 }
@@ -345,8 +346,34 @@ hash_type block::compute_first_transaction_hash() const {
     hash_utils::addIntegral(hasher, _ft_lock_time);
 
     hash_type ret;
-    hasher.Finalize(ret.data());
-    hasher.Reset().Write(ret.data(), 32).Finalize(ret.data());
-
+    hasher.doubleHashFinalize(ret.data());
     return ret;
+}
+
+hash_type block::compute_merkle_root() const {
+    std::vector<hash_type> hashes;
+    CSHA256 hasher;
+
+    hashes.push_back(compute_first_transaction_hash());
+    for (const auto &it : _transactions) hashes.push_back(it.compute_hash());
+
+    while (hashes.size() != 1) {
+        if(hashes.size() % 2 == 1) {
+            hasher.Write(hashes.at(hashes.size() - 1).data(), CSHA256::OUTPUT_SIZE)
+                    .Write(hashes.at(hashes.size() - 1).data(), CSHA256::OUTPUT_SIZE);
+            hasher.doubleHashFinalize(hashes.at(hashes.size() - 1).data());
+            hasher.Reset();
+        }
+
+        for (auto i = 0; i < hashes.size()/2; i++) {
+            hasher.Write(hashes.at(i).data(), CSHA256::OUTPUT_SIZE)
+                    .Write(hashes.at(i + 1).data(), CSHA256::OUTPUT_SIZE);
+
+            hashes.erase(hashes.begin() + i);
+            hasher.doubleHashFinalize(hashes.at(i).data());
+            hasher.Reset();
+        }
+    }
+
+    return hashes.at(0);
 }
