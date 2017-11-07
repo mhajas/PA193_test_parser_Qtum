@@ -79,6 +79,21 @@ public:
 
     hash_type compute_hash() const;
 
+
+    uint32_t get_ft_version() const;
+    std::array<uint8_t, 41> get_ft_unknown_val_1() const;
+    uint16_t get_block_height() const;
+    uint8_t get_ft_unknown_val2() const;
+    uint32_t get_ft_sequence() const;
+
+    uint8_t get_ft_ctxout_number() const;
+    std::vector<ctxout> get_ft_ctxouts() const;
+    std::uint8_t get_ft_number_of_unknown_sequences() const;
+    std::vector<std::vector<uint8_t>> get_ft_unknown_sequences() const;
+    uint32_t get_ft_n_time() const;
+
+    std::vector<transaction> get_transactions() const;
+
 public:
     friend std::ostream& operator<<(std::ostream& os, const block& block1);
     friend std::istream& operator>>(std::istream& is, block& block1);
