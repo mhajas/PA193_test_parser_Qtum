@@ -215,7 +215,7 @@ std::istream& operator>>(std::istream& is, c_script& script) {
         return is;
     }
 
-    while (script._storage_size == 0 || script._storage_size > 0x4c) {
+    while (script._storage_size == 0 || script._storage_size >= 0x4c) {
         script._before_flags.push_back(script._storage_size);
 
         if(parsing_utils::parse_bytes(is, static_cast<void*>(&script._storage_size), sizeof(script._storage_size),
