@@ -3,3 +3,8 @@
 //
 
 #include "parser.h"
+
+
+block parser::get_block() const {
+    return _b;
+}

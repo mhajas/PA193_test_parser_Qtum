@@ -10,6 +10,7 @@
 #include "../external/crypto/sha256.h"
 #include "../utils/parsing_utils.h"
 #include "../utils/hash_utils.h"
+#include "../utils/validate.h"
 
 std::ostream& operator<<(std::ostream& os, const block& block1) {
     os << "Version: " << block1._version << std::endl;
@@ -289,6 +290,10 @@ uint8_t block::get_number_of_transactions() const {
     return _number_of_transactions;
 }
 
+uint16_t block::get_block_height() const{
+    return _block_height;
+}
+
 block::hash_type block::compute_hash() const {
     CSHA256 hasher;
 
@@ -377,4 +382,96 @@ hash_type block::compute_merkle_root() const {
     }
 
     return hashes.at(0);
+}
+
+bool block::validate() const{
+
+    // Check if version was initialized
+     if(_version == 0){
+         std::cout << "Error. Wrong block version." << std::endl;
+         return false;
+     }
+
+    //Check if merkle root is same as computed
+    hash_type computed_merkle_root = compute_merkle_root();
+    for(int i = 0; i < 32; i++){
+        if(_hash_merkle_root[i] != computed_merkle_root[32 - i - 1]){
+            std::cout << "Error. Wrong Merkle root" << std::endl;
+            return false;
+        }
+    }
+
+    //Check if time was initialized
+    if(_n_time == 0){
+        std::cout << "Error. Wrong time of creating block" << std::endl;
+        return false;
+    }
+
+    //Check size of block
+    if(_n_bits == 0){
+        std::cout << "Error. Wrong bits of block" << std::endl;
+        return false;
+    }
+
+    hash_type initial_hash_state_root = {0x2f, 0xb5, 0xde, 0x60, 0xde, 0x4c, 0x96, 0x1e,
+                                         0xa8, 0x09, 0xc9, 0x6d, 0x4d, 0x83, 0xfe, 0xad,
+                                         0x82, 0x15, 0xac, 0xb4, 0xce, 0x92, 0x27, 0xa4,
+                                         0xde, 0x3c, 0x3c, 0x7b, 0x42, 0x9e, 0xf6, 0xa0};
+    //Check hash state root
+    for(int i = 0; i < 32; i++){
+        if(_hash_state_root[i] != initial_hash_state_root[i]){
+            std::cout << "Error. Wrong hash state root";
+            return false;
+        }
+    }
+
+    hash_type initial_hash_UTXO_root = {0x21, 0xb4, 0x63, 0xe3, 0xb5, 0x2f, 0x62, 0x01,
+                                        0xc0, 0xad, 0x6c, 0x99, 0x1b, 0xe0, 0x48, 0x5b,
+                                        0x6e, 0xf8, 0xc0, 0x92, 0xe6, 0x45, 0x83, 0xff,
+                                        0xa6, 0x55, 0xcc, 0x1b, 0x17, 0x1f, 0xe8, 0x56};
+
+    //Check UTXO root
+    for(int i = 0; i < 32; i++){
+        if(_hash_UTXO_root[i] != initial_hash_UTXO_root[i]){
+            std::cout << "Error. Wrong UTXO root" << std::endl;
+            return false;
+        }
+    }
+
+    //Check if signature is valid
+    if(! validate::IsValidSignatureEncoding(_vch_block_sig, false)){
+        std::cout << "Error. Signature is nor valid" << std::endl;
+        return false;
+    }
+
+    //Check number of transactions
+    if(_number_of_transactions == 0 || _number_of_transactions == 1){
+        std::cout << "Error. Wrong number of transactions." << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+
+bool block::verify_following_transactions(const block& block2) const{
+
+    hash_type hash_first_block = compute_hash();
+
+    //Verify hash of previous block
+    for(int i = 0; i < 32; i++){
+        if(block2.get_hash_prev_block()[i] != hash_first_block[32 - i - 1]){
+            std::cout << "Error. Hash of previous block is not matching" << std::endl;
+            return false;
+        }
+    }
+
+    //Verify if height have difference of 1
+    if((get_block_height() + 1) != block2.get_block_height()){
+        std::cout << "Error. Block heights have not difference of 1" << std::endl;
+        return false;
+    }
+
+    return true;
+
 }

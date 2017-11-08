@@ -77,9 +77,14 @@ public:
 
     uint8_t get_number_of_transactions() const;
 
+    uint16_t get_block_height() const;
+
     hash_type compute_hash() const;
     hash_type compute_first_transaction_hash() const;
     hash_type compute_merkle_root() const;
+
+    bool validate() const;
+    bool verify_following_transactions(const block& block2) const;
 
 public:
     friend std::ostream& operator<<(std::ostream& os, const block& block1);
