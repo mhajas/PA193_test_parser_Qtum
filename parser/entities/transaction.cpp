@@ -139,6 +139,30 @@ hash_type transaction::compute_hash() const {
     return ret;
 }
 
+uint32_t transaction::get_version() const {
+    return _version;
+}
+
+uint8_t transaction::get_vin_count() const {
+    return _vin_count;
+}
+
+const std::vector<ctxin> &transaction::get_vin() const {
+    return _vin;
+}
+
+uint8_t transaction::get_vout_count() const {
+    return _vout_count;
+}
+
+const std::vector<ctxout> &transaction::get_vout() const {
+    return _vout;
+}
+
+uint32_t transaction::get_lock_time() const {
+    return _lock_time;
+}
+
 std::istream& operator>>(std::istream& is, ctxin& in) {
     is >> in._prevout;
     if (!is) {
