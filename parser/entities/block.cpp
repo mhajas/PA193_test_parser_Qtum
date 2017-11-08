@@ -366,7 +366,8 @@ hash_type block::compute_merkle_root() const {
             hasher.Reset();
         }
 
-        for (auto i = 0; i < hashes.size()/2; i++) {
+        size_t size = hashes.size()/2;
+        for (auto i = 0; i < size; i++) {
             hasher.Write(hashes.at(i).data(), CSHA256::OUTPUT_SIZE)
                     .Write(hashes.at(i + 1).data(), CSHA256::OUTPUT_SIZE);
 

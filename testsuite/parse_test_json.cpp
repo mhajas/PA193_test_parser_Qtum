@@ -67,21 +67,29 @@ void compare_bin_json(int block_number) {
     EXPECT_EQ(b.compute_hash(), to_hash_type(hex_reduction(j.at("hash")))) << "Hashes are different for block: " << block_number;
     EXPECT_EQ(b.get_version(), j.at("version"));
     EXPECT_EQ(b.get_hash_merkle_root(), to_hash_type(hex_reduction(j.at("merkleroot")))) << "Parsed merkle root is different for block: " << block_number;
-    //wrong computed merkle root for 22383, 22385, 22389
-    //EXPECT_EQ(b.compute_merkle_root(), to_hash_type(hex_reduction(j.at("merkleroot")))) << "Computed merkle root is different for block: " << block_number;
+    EXPECT_EQ(b.compute_merkle_root(), to_hash_type(hex_reduction(j.at("merkleroot")))) << "Computed merkle root is different for block: " << block_number;
     EXPECT_EQ(b.get_hash_state_root(), to_hash_type(hex_reduction(j.at("hashStateRoot")))) << "HashStateRoot is different for block " << block_number;
     EXPECT_EQ(b.get_hash_UTXO_root(), to_hash_type(hex_reduction(j.at("hashUTXORoot")))) << "HashUTXORoot is different for block " << block_number;
 
     EXPECT_EQ(b.get_n_time(), j.at("time")) << "Time is different for block " << block_number;
     EXPECT_EQ(b.get_n_nonce(), j.at("nonce")) << "Nonce is different for block " << block_number;
-    //EXPECT_EQ(b.get_n_bits(), j.at("bits")); - convert
+
+    std::string bits = j.at("bits");
+    uint32_t bits_num = std::stoul(bits, nullptr, 16);
+    EXPECT_EQ(b.get_n_bits(), bits_num) << "Block n bits is different for block " << block_number;
+
     EXPECT_EQ(b.get_block_height(), j.at("height")) << "Block height is different for block " << block_number;
 
     EXPECT_EQ(b.get_hash_prev_block(), to_hash_type(hex_reduction(j.at("previousblockhash")))) << "HashPrevBlock is different for block " << block_number;
 
+// add REVERSE!
     auto rev_hash = to_vector_type(hex_reduction(j.at("signature")));
     std::reverse(rev_hash.begin(), rev_hash.end());
-    EXPECT_EQ(b.get_vch_block_sig(), rev_hash); //- add REVERSE!
+    EXPECT_EQ(b.get_vch_block_sig(), rev_hash) << "Signature is different for block " << block_number;
+
+    std::string str = j.at("signature");
+    uint32_t size = str.length() / 2;
+    EXPECT_EQ(b.get_vch_block_sig_size(), size) << "Signature length is different for " << block_number;
 
     //test first transaction
     EXPECT_EQ(b.get_ft_version(), j.at("tx")[0].at("version")) << "First transaction version is different for block " << block_number;
@@ -90,12 +98,11 @@ void compare_bin_json(int block_number) {
     auto ft_outs = b.get_ft_ctxouts();
     int pos_ft_o = 0;
     for(auto fout = ft_outs.begin(); fout < ft_outs.end(); fout++) {
-//                //convert to int64_t
-//                EXPECT_EQ(fout.base()->_amount, j.at("tx")[0].at("vout")[pos_ft_o].at("n"));
+// convert to int64_t
+//        EXPECT_EQ(fout.base()->_amount, j.at("tx")[0].at("vout")[pos_ft_o].at("n"));
         pos_ft_o++;
     }
     EXPECT_EQ(pos_ft_o, b.get_ft_ctxout_number()) << "First transaction vout count is diffrent for block " << block_number;
-    //?
 
     //the others transactions
     if (b.get_number_of_transactions() > 1) {
@@ -127,8 +134,8 @@ void compare_bin_json(int block_number) {
             auto vouts = t.base()->get_vout();
             pos_v = 0;
             for(auto vout = vouts.begin(); vout < vouts.end(); vout++) {
-//                //convert to int64_t
-//                EXPECT_EQ(vout.base()->_amount, j.at("tx")[pos].at("vout")[pos_v].at("n"));
+//convert to int64_t
+//                EXPECT_EQ(vout.base()->_amount, j.at("tx")[pos].at("vout")[pos_v].at("value").get<int64_t>());
                 pos_v++;
             }
             EXPECT_EQ(pos_v, t.base()->get_vout_count()) << "Transaction (" << pos << ") vout count is diffrent for block " << block_number;
