@@ -10,6 +10,7 @@
 #include "../utils/parsing_utils.h"
 
 using hash_type = std::array<uint8_t, 32>;
+using vector_type = std::vector<uint8_t>;
 
 struct c_out_point{
     hash_type _hash;
@@ -67,6 +68,18 @@ class transaction {
     uint8_t _vout_count;
     std::vector<ctxout> _vout;
     uint32_t _lock_time;
+public:
+    uint32_t get_version() const;
+
+    uint8_t get_vin_count() const;
+
+    const std::vector<ctxin> &get_vin() const;
+
+    uint8_t get_vout_count() const;
+
+    const std::vector<ctxout> &get_vout() const;
+
+    uint32_t get_lock_time() const;
 
 public:
     hash_type compute_hash() const;

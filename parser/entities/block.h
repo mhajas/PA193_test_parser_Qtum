@@ -77,9 +77,31 @@ public:
 
     uint8_t get_number_of_transactions() const;
 
+    uint32_t get_ft_version() const;
+
+    const std::array<uint8_t, 41> &get_ft_unknown_val_1() const;
+
+    uint16_t get_block_height() const;
+
+    uint8_t get_ft_unknown_val2() const;
+
+    uint32_t get_ft_sequence() const;
+
+    uint8_t get_ft_ctxout_number() const;
+
+    const std::vector<ctxout> &get_ft_ctxouts() const;
+
+    uint8_t get_ft_number_of_unknown_sequences() const;
+
+    const std::vector<std::vector<uint8_t>> &get_ft_unknown_sequences() const;
+
+    uint32_t get_ft_lock_time() const;
+
     hash_type compute_hash() const;
     hash_type compute_first_transaction_hash() const;
     hash_type compute_merkle_root() const;
+
+    std::vector<transaction> get_transactions();
 
 public:
     friend std::ostream& operator<<(std::ostream& os, const block& block1);

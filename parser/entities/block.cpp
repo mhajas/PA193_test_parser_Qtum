@@ -308,6 +308,7 @@ block::hash_type block::compute_hash() const {
     hash_type ret;
     hasher.doubleHashFinalize(ret.data());
 
+    std::reverse(std::begin(ret), std::end(ret));
     return ret;
 }
 
@@ -376,5 +377,51 @@ hash_type block::compute_merkle_root() const {
         }
     }
 
+    std::reverse(std::begin(hashes.at(0)), std::end(hashes.at(0)));
+
     return hashes.at(0);
+}
+
+std::vector<transaction> block::get_transactions() {
+    return _transactions;
+}
+
+uint32_t block::get_ft_version() const {
+    return _ft_version;
+}
+
+const std::array<uint8_t, 41> &block::get_ft_unknown_val_1() const {
+    return _ft_unknown_val_1;
+}
+
+uint16_t block::get_block_height() const {
+    return _block_height;
+}
+
+uint8_t block::get_ft_unknown_val2() const {
+    return _ft_unknown_val2;
+}
+
+uint32_t block::get_ft_sequence() const {
+    return _ft_sequence;
+}
+
+uint8_t block::get_ft_ctxout_number() const {
+    return _ft_ctxout_number;
+}
+
+const std::vector<ctxout> &block::get_ft_ctxouts() const {
+    return _ft_ctxouts;
+}
+
+uint8_t block::get_ft_number_of_unknown_sequences() const {
+    return _ft_number_of_unknown_sequences;
+}
+
+const std::vector<std::vector<uint8_t>> &block::get_ft_unknown_sequences() const {
+    return _ft_unknown_sequences;
+}
+
+uint32_t block::get_ft_lock_time() const {
+    return _ft_lock_time;
 }
