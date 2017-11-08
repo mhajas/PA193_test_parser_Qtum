@@ -26,8 +26,14 @@ public:
         }
 
         file >> _b;
-        std::cout << _b;
+        if(file.fail()){
+            std::cout << "block was not parsed correctly" << std::endl;
+        }else{
+            std::cout << _b;
+        }
     }
+
+    block get_block() const;
 };
 
 

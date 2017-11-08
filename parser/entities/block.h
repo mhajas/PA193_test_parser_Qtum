@@ -96,12 +96,17 @@ public:
     const std::vector<std::vector<uint8_t>> &get_ft_unknown_sequences() const;
 
     uint32_t get_ft_lock_time() const;
+  
+    std::vector<transaction> get_transactions();
 
     hash_type compute_hash() const;
     hash_type compute_first_transaction_hash() const;
     hash_type compute_merkle_root() const;
 
-    std::vector<transaction> get_transactions();
+
+    bool validate() const;
+    bool verify_following_transactions(const block& block2) const;
+
 
 public:
     friend std::ostream& operator<<(std::ostream& os, const block& block1);
