@@ -425,3 +425,47 @@ const std::vector<std::vector<uint8_t>> &block::get_ft_unknown_sequences() const
 uint32_t block::get_ft_lock_time() const {
     return _ft_lock_time;
 }
+
+uint32_t block::get_ft_version() const {
+    return _ft_version;
+}
+
+std::array<uint8_t, 41> block::get_ft_unknown_val_1() const {
+    return _ft_unknown_val_1;
+};
+
+uint16_t block::get_block_height() const {
+    return _block_height;
+}
+
+uint8_t block::get_ft_unknown_val2() const {
+    return _ft_unknown_val2;
+}
+
+uint32_t block::get_ft_sequence() const {
+    return _ft_sequence;
+}
+
+uint8_t block::get_ft_ctxout_number() const {
+    return _ft_ctxout_number;
+}
+
+std::vector<ctxout> block::get_ft_ctxouts() const {
+    return _ft_ctxouts;
+}
+
+std::uint8_t block::get_ft_number_of_unknown_sequences() const {
+    return _ft_number_of_unknown_sequences;
+}
+
+std::vector<std::vector<uint8_t>> block::get_ft_unknown_sequences() const {
+    return _ft_unknown_sequences;
+}
+
+uint32_t block::get_ft_n_time() const {
+    return _ft_n_time;
+}
+
+std::vector<transaction> block::get_transactions() const {
+    return _transactions;
+}

@@ -298,3 +298,67 @@ std::istream& operator>>(std::istream& is, ctxout& out) {
 
     return is;
 }
+
+uint32_t transaction::get_version() {
+    return _version;
+}
+
+uint8_t transaction::get_vin_count() {
+    return _vin_count;
+}
+
+std::vector<ctxin> transaction::get_vin() {
+    return _vin;
+}
+
+uint8_t transaction::get_vout_count() {
+    return _vout_count;
+}
+
+std::vector<ctxout> transaction::get_vout() {
+    return _vout;
+}
+
+uint32_t transaction::get_lock_time() {
+    return _lock_time;
+}
+
+int64_t ctxout::get_amount() {
+    return _amount;
+}
+
+c_script ctxout::get_pub_key_script() {
+    return _pub_key_script;
+}
+
+c_out_point ctxin::get_prevout() {
+    return _prevout;
+}
+
+c_script ctxin::get_pub_key_script() {
+    return _pub_key_script;
+}
+
+uint32_t ctxin::get_sequence() {
+    return _sequence;
+}
+
+uint8_t c_script::get_size() {
+    return _size;
+}
+
+std::vector<uint8_t> c_script::get_before_flags() {
+    return _before_flags;
+}
+
+uint8_t c_script::get_storage_size() {
+    return _storage_size;
+}
+
+std::vector<uint8_t> c_script::get_storage() {
+    return _storage;
+}
+
+std::vector<uint8_t> c_script::get_after_flags() {
+    return _after_flags;
+}
