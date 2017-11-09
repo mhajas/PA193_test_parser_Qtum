@@ -327,31 +327,6 @@ bool block::validate() const{
         return false;
     }
 
-    hash_type initial_hash_state_root = {0x2f, 0xb5, 0xde, 0x60, 0xde, 0x4c, 0x96, 0x1e,
-                                         0xa8, 0x09, 0xc9, 0x6d, 0x4d, 0x83, 0xfe, 0xad,
-                                         0x82, 0x15, 0xac, 0xb4, 0xce, 0x92, 0x27, 0xa4,
-                                         0xde, 0x3c, 0x3c, 0x7b, 0x42, 0x9e, 0xf6, 0xa0};
-    //Check hash state root
-    for(int i = 0; i < 32; i++){
-        if(_hash_state_root[i] != initial_hash_state_root[i]){
-            std::cout << "Error. Wrong hash state root";
-            return false;
-        }
-    }
-
-    hash_type initial_hash_UTXO_root = {0x21, 0xb4, 0x63, 0xe3, 0xb5, 0x2f, 0x62, 0x01,
-                                        0xc0, 0xad, 0x6c, 0x99, 0x1b, 0xe0, 0x48, 0x5b,
-                                        0x6e, 0xf8, 0xc0, 0x92, 0xe6, 0x45, 0x83, 0xff,
-                                        0xa6, 0x55, 0xcc, 0x1b, 0x17, 0x1f, 0xe8, 0x56};
-
-    //Check UTXO root
-    for(int i = 0; i < 32; i++){
-        if(_hash_UTXO_root[i] != initial_hash_UTXO_root[i]){
-            std::cout << "Error. Wrong UTXO root" << std::endl;
-            return false;
-        }
-    }
-
     //Check if signature is valid
     if(! validate::IsValidSignatureEncoding(_vch_block_sig, false)){
         std::cout << "Error. Signature is nor valid" << std::endl;
