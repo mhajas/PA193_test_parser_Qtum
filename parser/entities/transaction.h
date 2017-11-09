@@ -43,8 +43,8 @@ struct c_script{
     uint16_t get_size() {return _extended_size == 0 ? _size : _extended_size;}
 
 public:
-    c_script() : _extended_size(0)
-            , _size(0)
+    c_script() : _size(0)
+            , _extended_size(0)
             , _storage_size(0)
     {};
     friend std::ostream& operator<<(std::ostream& os, const c_script& script);
@@ -87,13 +87,13 @@ class transaction {
     std::vector<std::vector<uint8_t>> _witnesses;
 
 public:
-    transaction() : _extended_vin_count(0)
-            , _extended_vout_count(0)
-            , _has_witness(false)
-            , _version(0)
+    transaction() : _version(0)
             , _vin_count(0)
             , _vout_count(0)
             , _lock_time(0)
+            , _extended_vin_count(0)
+            , _extended_vout_count(0)
+            , _has_witness(false)
             , _witnesses_number(0)
     {};
 

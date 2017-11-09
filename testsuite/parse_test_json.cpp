@@ -186,7 +186,7 @@ TEST(parsing, correct_block_22390_json) {
 
 //TEST(parsing, block_chain) {
 //
-//    for (auto i = 15; i >= 0; i--) {
+//    for (auto i = 22390; i >= 22300; i--) {
 //        std::cout << "CHECKING BLOCK NUMBER: " << i << std::endl;
 //
 //        compare_bin_json(i);

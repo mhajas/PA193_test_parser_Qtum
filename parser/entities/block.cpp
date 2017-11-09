@@ -39,7 +39,7 @@ std::ostream& operator<<(std::ostream& os, const block& block1) {
     for (auto it : block1._prevout_stake.get_hash()) os << std::setfill('0') << std::setw(2) << std::hex << (int) it;
     os << std::endl;
     os << "Index n of prevout stake: " << block1._prevout_stake.get_index_n() << std::endl;
-    os << "vch Block signature: " ;
+    os << "vch Block signature: ";
     for (auto it : block1._vch_block_sig) os << std::setfill('0') << std::setw(2) << std::hex << (int) it;
     os << std::endl << std::endl;
 
@@ -50,7 +50,7 @@ std::ostream& operator<<(std::ostream& os, const block& block1) {
         os << "Transaction number " << i++ << ":" << std::endl << it;
     }
 
-    os << "Block Hash: " ;
+    os << "Block Hash: ";
     for (auto it : block1.compute_hash()) os << std::setfill('0') << std::setw(2) << std::hex << (int) it;
     os << std::endl;
 
@@ -58,49 +58,61 @@ std::ostream& operator<<(std::ostream& os, const block& block1) {
 }
 
 std::istream& operator>>(std::istream& is, block& block1) {
-    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._version), sizeof(block1._version), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+    if (parsing_utils::parse_bytes(is, static_cast<void *>(&block1._version), sizeof(block1._version),
+                                   parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
         std::cout << "Failed to read Version" << std::endl;
         is.setstate(std::ios::failbit);
         return is;
     }
 
-    if (parsing_utils::parse_reverse_bytes(is, static_cast<void*>(block1._hash_prev_block.data()), block1._hash_prev_block.size(), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+    if (parsing_utils::parse_reverse_bytes(is, static_cast<void *>(block1._hash_prev_block.data()),
+                                           block1._hash_prev_block.size(), parsing_utils::is_big_endian()) !=
+        parsing_utils::SUCCESS) {
         std::cout << "Failed to read hash of previous block" << std::endl;
         is.setstate(std::ios::failbit);
         return is;
     }
 
-    if (parsing_utils::parse_reverse_bytes(is, static_cast<void*>(block1._hash_merkle_root.data()), block1._hash_merkle_root.size(), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+    if (parsing_utils::parse_reverse_bytes(is, static_cast<void *>(block1._hash_merkle_root.data()),
+                                           block1._hash_merkle_root.size(), parsing_utils::is_big_endian()) !=
+        parsing_utils::SUCCESS) {
         std::cout << "Failed to read merkle root hash" << std::endl;
         is.setstate(std::ios::failbit);
         return is;
     }
 
-    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._n_time), sizeof(block1._n_time), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+    if (parsing_utils::parse_bytes(is, static_cast<void *>(&block1._n_time), sizeof(block1._n_time),
+                                   parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
         std::cout << "Failed to read nTime" << std::endl;
         is.setstate(std::ios::failbit);
         return is;
     }
 
-    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._n_bits), sizeof(block1._n_bits), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+    if (parsing_utils::parse_bytes(is, static_cast<void *>(&block1._n_bits), sizeof(block1._n_bits),
+                                   parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
         std::cout << "Failed to read nBits" << std::endl;
         is.setstate(std::ios::failbit);
         return is;
     }
 
-    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._n_nonce), sizeof(block1._n_nonce), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+    if (parsing_utils::parse_bytes(is, static_cast<void *>(&block1._n_nonce), sizeof(block1._n_nonce),
+                                   parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
         std::cout << "Failed to read nNonce" << std::endl;
         is.setstate(std::ios::failbit);
         return is;
     }
 
-    if (parsing_utils::parse_reverse_bytes(is, static_cast<void*>(block1._hash_state_root.data()), block1._hash_state_root.size(), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+    if (parsing_utils::parse_reverse_bytes(is, static_cast<void *>(block1._hash_state_root.data()),
+                                           block1._hash_state_root.size(), parsing_utils::is_big_endian()) !=
+        parsing_utils::SUCCESS) {
         std::cout << "Failed to read state root hash" << std::endl;
         is.setstate(std::ios::failbit);
         return is;
     }
 
-    if (parsing_utils::parse_reverse_bytes(is, static_cast<void*>(block1._hash_UTXO_root.data()), block1._hash_UTXO_root.size(), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+    if (parsing_utils::parse_reverse_bytes(is, static_cast<void *>(block1._hash_UTXO_root.data()),
+                                           block1._hash_UTXO_root.size(), parsing_utils::is_big_endian()) !=
+        parsing_utils::SUCCESS) {
         std::cout << "Failed to read UTXO root hash" << std::endl;
         is.setstate(std::ios::failbit);
         return is;
@@ -112,7 +124,9 @@ std::istream& operator>>(std::istream& is, block& block1) {
         std::cout << "Failed to read prevout stake of first transaction" << std::endl;
     }
 
-    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._vch_block_sig_size), sizeof(block1._vch_block_sig_size), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+    if (parsing_utils::parse_bytes(is, static_cast<void *>(&block1._vch_block_sig_size),
+                                   sizeof(block1._vch_block_sig_size), parsing_utils::is_big_endian()) !=
+        parsing_utils::SUCCESS) {
         std::cout << "Failed to read size of block signature" << std::endl;
         is.setstate(std::ios::failbit);
         return is;
@@ -120,20 +134,26 @@ std::istream& operator>>(std::istream& is, block& block1) {
 
     block1._vch_block_sig.resize(block1._vch_block_sig_size);
 
-    if (parsing_utils::parse_reverse_bytes(is, static_cast<void*>(&(block1._vch_block_sig[0])), block1._vch_block_sig_size, parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+    if (parsing_utils::parse_reverse_bytes(is, static_cast<void *>(&(block1._vch_block_sig[0])),
+                                           block1._vch_block_sig_size, parsing_utils::is_big_endian()) !=
+        parsing_utils::SUCCESS) {
         std::cout << "Failed to read vch block signature" << std::endl;
         is.setstate(std::ios::failbit);
         return is;
     }
 
-    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._number_of_transactions), sizeof(block1._number_of_transactions), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+    if (parsing_utils::parse_bytes(is, static_cast<void *>(&block1._number_of_transactions),
+                                   sizeof(block1._number_of_transactions), parsing_utils::is_big_endian()) !=
+        parsing_utils::SUCCESS) {
         std::cout << "Failed to read number of transactions" << std::endl;
         is.setstate(std::ios::failbit);
         return is;
     }
 
     if (block1._number_of_transactions == 253) {
-        if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._extended_number_of_transactions), sizeof(block1._extended_number_of_transactions), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+        if (parsing_utils::parse_bytes(is, static_cast<void *>(&block1._extended_number_of_transactions),
+                                       sizeof(block1._extended_number_of_transactions),
+                                       parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
             std::cout << "Failed to read number of transactions" << std::endl;
             is.setstate(std::ios::failbit);
             return is;
@@ -155,12 +175,21 @@ std::istream& operator>>(std::istream& is, block& block1) {
     return is;
 }
 
-block::block() : _version(0)
-    , _extended_number_of_transactions(0)
-{}
+block::block() : _version(0), _n_time(0),
+                 _n_bits(0), _n_nonce(0),
+                 _vch_block_sig_size(0),
+                 _vch_block_sig(0),
+                 _number_of_transactions(0),
+                 _extended_number_of_transactions(0),
+                 _transactions(0) {}
 
-block::block(std::istream& stream) : _version(0)
-        , _extended_number_of_transactions(0) {
+block::block(std::istream &stream) : _version(0), _n_time(0),
+                                     _n_bits(0), _n_nonce(0),
+                                     _vch_block_sig_size(0),
+                                     _vch_block_sig(0),
+                                     _number_of_transactions(0),
+                                     _extended_number_of_transactions(0),
+                                     _transactions(0) {
     stream >> *this;
 }
 
@@ -246,14 +275,14 @@ hash_type block::compute_merkle_root() const {
     for (const auto &it : _transactions) hashes.push_back(it.compute_hash());
 
     while (hashes.size() != 1) {
-        if(hashes.size() % 2 == 1) {
+        if (hashes.size() % 2 == 1) {
             hasher.Write(hashes.at(hashes.size() - 1).data(), CSHA256::OUTPUT_SIZE)
                     .Write(hashes.at(hashes.size() - 1).data(), CSHA256::OUTPUT_SIZE);
             hasher.doubleHashFinalize(hashes.at(hashes.size() - 1).data());
             hasher.Reset();
         }
 
-        size_t size = hashes.size()/2;
+        size_t size = hashes.size() / 2;
         for (auto i = 0; i < size; i++) {
             hasher.Write(hashes.at(i).data(), CSHA256::OUTPUT_SIZE)
                     .Write(hashes.at(i + 1).data(), CSHA256::OUTPUT_SIZE);
@@ -364,7 +393,7 @@ bool block::verify_following_transactions(const block& block2) const{
 uint32_t block::get_block_height() const {
     uint32_t ret = 0;
 
-    for (auto i = 0; i < _transactions[0].get_vin()[0]._pub_key_script._storage_size ; i++) {
+    for (auto i = 0; i < _transactions[0].get_vin()[0]._pub_key_script._storage_size; i++) {
         ret += _transactions[0].get_vin()[0]._pub_key_script._storage[i];
         if (i != _transactions[0].get_vin()[0]._pub_key_script._storage_size - 1) {
             ret <<= 8;
