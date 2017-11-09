@@ -309,7 +309,7 @@ bool block::validate() const{
     //Check if merkle root is same as computed
     hash_type computed_merkle_root = compute_merkle_root();
     for(int i = 0; i < 32; i++){
-        if(_hash_merkle_root[i] != computed_merkle_root[32 - i - 1]){
+        if(_hash_merkle_root[i] != computed_merkle_root[i]){
             std::cout << "Error. Wrong Merkle root" << std::endl;
             return false;
         }
@@ -349,7 +349,7 @@ bool block::verify_following_transactions(const block& block2) const{
 
     //Verify hash of previous block
     for(int i = 0; i < 32; i++){
-        if(block2.get_hash_prev_block()[i] != hash_first_block[32 - i - 1]){
+        if(block2.get_hash_prev_block()[i] != hash_first_block[i]){
             std::cout << "Error. Hash of previous block is not matching" << std::endl;
             return false;
         }
