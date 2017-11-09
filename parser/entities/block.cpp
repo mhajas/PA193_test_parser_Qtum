@@ -11,6 +11,7 @@
 #include "../utils/parsing_utils.h"
 #include "../utils/hash_utils.h"
 #include "../utils/validate.h"
+#include "transaction.h"
 
 std::ostream& operator<<(std::ostream& os, const block& block1) {
     os << "Version: " << block1._version << std::endl;
@@ -42,19 +43,9 @@ std::ostream& operator<<(std::ostream& os, const block& block1) {
     for (auto it : block1._vch_block_sig) os << std::setfill('0') << std::setw(2) << std::hex << (int) it;
     os << std::endl << std::endl;
 
-    os << "Number of transactions: " << (int) block1._number_of_transactions << std::endl << std::endl;
+    os << "Number of transactions: " << (int) block1.get_number_of_transactions() << std::endl << std::endl;
 
-    os  << "First transaction (coin for miner)" << std::endl;
-    os << "Version: " << (int) block1._ft_version << std::endl;
-    os << "Height: " << std::dec << block1._block_height << std::endl;
-    os << "CScript " << std::endl;
-    for (auto it : block1._ft_ctxouts) os << it;
-    os << "Time: " << block1._ft_lock_time << std::endl;
-    os << "Transaction hash: ";
-    for (auto it : block1.compute_first_transaction_hash()) os << std::setfill('0') << std::setw(2) << std::hex << (int) it;
-    os << std::endl;
-
-    int i = 2;
+    int i = 1;
     for (auto it : block1._transactions) {
         os << "Transaction number " << i++ << ":" << std::endl << it;
     }
@@ -141,87 +132,15 @@ std::istream& operator>>(std::istream& is, block& block1) {
         return is;
     }
 
-    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._ft_version), sizeof(block1._ft_version), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
-        std::cout << "Failed to read first transaction version" << std::endl;
-        is.setstate(std::ios::failbit);
-        return is;
-    }
-
-    if (parsing_utils::parse_reverse_bytes(is, static_cast<void*>(&(block1._ft_unknown_val_1[0])), block1._ft_unknown_val_1.size(), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
-        std::cout << "Failed to read first transaction unknown val 1" << std::endl;
-        is.setstate(std::ios::failbit);
-        return is;
-    }
-
-    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._block_height), sizeof(block1._block_height), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
-        std::cout << "Failed to read block height" << std::endl;
-        is.setstate(std::ios::failbit);
-        return is;
-    }
-
-    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._ft_unknown_val2), sizeof(block1._ft_unknown_val2), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
-        std::cout << "Failed to read unknown value 2" << std::endl;
-        is.setstate(std::ios::failbit);
-        return is;
-    }
-
-    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._ft_sequence), sizeof(block1._ft_sequence), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
-        std::cout << "Failed to read first transaction sequence" << std::endl;
-        is.setstate(std::ios::failbit);
-        return is;
-    }
-
-    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._ft_ctxout_number), sizeof(block1._ft_ctxout_number), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
-        std::cout << "Failed to read first transaction number out contexts" << std::endl;
-        is.setstate(std::ios::failbit);
-        return is;
-    }
-
-    for (auto i = 0; i < block1._ft_ctxout_number; i++) {
-        ctxout out;
-
-        is >> out;
-
-        if (!is) {
-            std::cout << "Failed to read out context number: " << i << std::endl;
-        }
-
-        block1._ft_ctxouts.push_back(std::move(out));
-    }
-
-
-    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._ft_number_of_unknown_sequences), sizeof(block1._ft_number_of_unknown_sequences), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
-        std::cout << "Failed to read first transaction out scripts number" << std::endl;
-        is.setstate(std::ios::failbit);
-        return is;
-    }
-
-    for (auto i = 0; i < block1._ft_number_of_unknown_sequences; i++) {
-        uint8_t size;
-        if (parsing_utils::parse_bytes(is, static_cast<void*>(&size), sizeof(size), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
-            std::cout << "Failed to read size of unknown block number: " << i << std::endl;
+    if (block1._number_of_transactions == 253) {
+        if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._extended_number_of_transactions), sizeof(block1._extended_number_of_transactions), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+            std::cout << "Failed to read number of transactions" << std::endl;
             is.setstate(std::ios::failbit);
             return is;
         }
-
-        std::vector<uint8_t> vector1(size);
-
-        if (parsing_utils::parse_bytes(is, static_cast<void*>(vector1.data()), size, parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
-            std::cout << "Failed to read unknown block number: " << i << std::endl;
-            is.setstate(std::ios::failbit);
-            return is;
-        }
-
-        block1._ft_unknown_sequences.push_back(std::move(vector1));
     }
 
-    if (parsing_utils::parse_bytes(is, static_cast<void*>(&block1._ft_lock_time), sizeof(block1._ft_lock_time), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
-        std::cout << "Failed to read first transaction out scripts number" << std::endl;
-        is.setstate(std::ios::failbit);
-        return is;
-    }
-
-    for (auto i = 0; i < block1._number_of_transactions - 1; i++) {
+    for (auto i = 0; i < block1.get_number_of_transactions(); i++) {
         transaction t;
         is >> t;
 
@@ -236,9 +155,12 @@ std::istream& operator>>(std::istream& is, block& block1) {
     return is;
 }
 
-block::block() : _version(0) {}
+block::block() : _version(0)
+    , _extended_number_of_transactions(0)
+{}
 
-block::block(std::istream& stream) {
+block::block(std::istream& stream) : _version(0)
+        , _extended_number_of_transactions(0) {
     stream >> *this;
 }
 
@@ -286,52 +208,12 @@ const block::vector_type &block::get_vch_block_sig() const {
     return _vch_block_sig;
 }
 
-uint8_t block::get_number_of_transactions() const {
-    return _number_of_transactions;
+uint16_t block::get_number_of_transactions() const {
+    return _extended_number_of_transactions == 0 ? _number_of_transactions : _extended_number_of_transactions;
 }
 
 std::vector<transaction> block::get_transactions() {
     return _transactions;
-}
-
-uint32_t block::get_ft_version() const {
-    return _ft_version;
-}
-
-const std::array<uint8_t, 41> &block::get_ft_unknown_val_1() const {
-    return _ft_unknown_val_1;
-}
-
-uint16_t block::get_block_height() const {
-    return _block_height;
-}
-
-uint8_t block::get_ft_unknown_val2() const {
-    return _ft_unknown_val2;
-}
-
-uint32_t block::get_ft_sequence() const {
-    return _ft_sequence;
-}
-
-uint8_t block::get_ft_ctxout_number() const {
-    return _ft_ctxout_number;
-}
-
-const std::vector<ctxout> &block::get_ft_ctxouts() const {
-    return _ft_ctxouts;
-}
-
-uint8_t block::get_ft_number_of_unknown_sequences() const {
-    return _ft_number_of_unknown_sequences;
-}
-
-const std::vector<std::vector<uint8_t>> &block::get_ft_unknown_sequences() const {
-    return _ft_unknown_sequences;
-}
-
-uint32_t block::get_ft_lock_time() const {
-    return _ft_lock_time;
 }
 
 block::hash_type block::compute_hash() const {
@@ -357,50 +239,10 @@ block::hash_type block::compute_hash() const {
     return ret;
 }
 
-hash_type block::compute_first_transaction_hash() const {
-    CSHA256 hasher;
-    hash_utils::addIntegral(hasher, _ft_version);
-
-    std::vector<uint8_t > newVec(_ft_unknown_val_1.begin(), _ft_unknown_val_1.end() - 2);
-
-    hash_utils::addContainer(hasher, newVec);
-    hash_utils::addIntegral(hasher, _block_height);
-    hash_utils::addIntegral(hasher, _ft_unknown_val2);
-    hash_utils::addIntegral(hasher, _ft_sequence);
-
-    hash_utils::addIntegral(hasher, _ft_ctxout_number);
-    for(auto it : _ft_ctxouts) {
-        hash_utils::addIntegral(hasher, it._amount);
-
-
-        hash_utils::addIntegral(hasher, it._pub_key_script._size);
-
-        if (it._pub_key_script._size != 0) {
-            for (auto before_script : it._pub_key_script._before_flags) {
-                hash_utils::addIntegral(hasher, before_script);
-            }
-
-            hash_utils::addIntegral(hasher, it._pub_key_script._storage_size);
-            hash_utils::addContainer(hasher, it._pub_key_script._storage);
-
-            for (auto after_script : it._pub_key_script._after_flags) {
-                hash_utils::addIntegral(hasher, after_script);
-            }
-        }
-    }
-
-    hash_utils::addIntegral(hasher, _ft_lock_time);
-
-    hash_type ret;
-    hasher.doubleHashFinalize(ret.data());
-    return ret;
-}
-
 hash_type block::compute_merkle_root() const {
     std::vector<hash_type> hashes;
     CSHA256 hasher;
 
-    hashes.push_back(compute_first_transaction_hash());
     for (const auto &it : _transactions) hashes.push_back(it.compute_hash());
 
     while (hashes.size() != 1) {
@@ -517,4 +359,16 @@ bool block::verify_following_transactions(const block& block2) const{
 
     return true;
 
+}
+
+uint32_t block::get_block_height() const {
+    uint32_t ret = 0;
+
+    for (auto i = 0; i < _transactions[0].get_vin()[0]._pub_key_script._storage_size ; i++) {
+        ret += _transactions[0].get_vin()[0]._pub_key_script._storage[i];
+        if (i != _transactions[0].get_vin()[0]._pub_key_script._storage_size - 1) {
+            ret <<= 8;
+        }
+    }
+    return ret;
 }

@@ -83,61 +83,60 @@ void compare_bin_json(int block_number) {
     EXPECT_EQ(b.get_hash_prev_block(), to_hash_type(hex_reduction(parsed_json.at("previousblockhash")))) << "HashPrevBlock is different for block " << block_number;
 
     // add REVERSE!
-    auto rev_hash = to_vector_type(hex_reduction(parsed_json.at("signature")));
-    std::reverse(rev_hash.begin(), rev_hash.end());
-    EXPECT_EQ(b.get_vch_block_sig(), rev_hash) << "Signature is different for block " << block_number;
+    if (parsed_json.find("signature") != parsed_json.end()) {
+        auto rev_hash = to_vector_type(hex_reduction(parsed_json.at("signature")));
+        std::reverse(rev_hash.begin(), rev_hash.end());
+        EXPECT_EQ(b.get_vch_block_sig(), rev_hash) << "Signature is different for block " << block_number;
 
-    std::string str = parsed_json.at("signature");
-    unsigned long size = str.length() / 2;
-    EXPECT_EQ(b.get_vch_block_sig_size(), size) << "Signature length is different for " << block_number;
-
-    // test first transaction
-    EXPECT_EQ(b.get_ft_version(), parsed_json.at("tx")[0].at("version")) << "First transaction version is different for block " << block_number;
-    EXPECT_EQ(b.get_ft_lock_time(), parsed_json.at("tx")[0].at("locktime")) << "First transaction lockTime is different for block " << block_number;
-
-    int position_ft_out = 0;
-    for(auto ft_out : b.get_ft_ctxouts()) {
-        int64_t amount = static_cast<double>(parsed_json.at("tx")[0].at("vout")[position_ft_out].at("value")) * 100000000; // Converting double to int64_t
-        EXPECT_TRUE(std::abs(ft_out._amount - amount) <=1);
-        position_ft_out++;
+        std::string str = parsed_json.at("signature");
+        unsigned long size = str.length() / 2;
+        EXPECT_EQ(b.get_vch_block_sig_size(), size) << "Signature length is different for " << block_number;
     }
-    EXPECT_EQ(position_ft_out, b.get_ft_ctxout_number()) << "First transaction vout count is diffrent for block " << block_number;
+    // test transactions
+    std::vector<transaction> block_transactions = b.get_transactions();
+    int current_transaction_index = 0;
+    for (auto current_transaction : block_transactions) {
+        auto expected_transaction = parsed_json.at("tx")[current_transaction_index];
+        EXPECT_EQ(current_transaction.get_version(), expected_transaction.at("version")) << "Transaction (" << current_transaction_index << ") version is diffrent for block " << block_number;
+        EXPECT_EQ(current_transaction.get_lock_time(), expected_transaction.at("locktime")) << "Transaction (" << current_transaction_index << ") lockTime is diffrent for block " << block_number;
 
-    // the others transactions
-    if (b.get_number_of_transactions() > 1) {
-        std::vector<transaction> block_transactions = b.get_transactions();
-        int current_transaction_index = 1;
-        for (auto current_transaction : block_transactions) {
-            auto expected_transaction = parsed_json.at("tx")[current_transaction_index];
-            EXPECT_EQ(current_transaction.get_version(), expected_transaction.at("version")) << "Transaction (" << current_transaction_index << ") version is diffrent for block " << block_number;
-            EXPECT_EQ(current_transaction.get_lock_time(), expected_transaction.at("locktime")) << "Transaction (" << current_transaction_index << ") lockTime is diffrent for block " << block_number;
+        int current_position_json = 0;
+        for(auto vin : current_transaction.get_vin()) {
+            if (current_transaction_index != 0) {
+                EXPECT_EQ(vin._sequence,
+                          parsed_json.at("tx")[current_transaction_index].at("vin")[current_position_json].at(
+                                  "sequence"))
+                                    << "Transaction (" << current_transaction_index << ") vin ("
+                                    << current_position_json << ") is diffrent for block " << block_number;
 
-            int current_position_json = 0;
-            for(auto vin : current_transaction.get_vin()) {
-                EXPECT_EQ(vin._sequence, parsed_json.at("tx")[current_transaction_index].at("vin")[current_position_json].at("sequence"))
-                                    << "Transaction (" << current_transaction_index << ") vin (" << current_position_json << ") is diffrent for block " << block_number;
 
-                EXPECT_EQ(vin._prevout.get_index_n(), parsed_json.at("tx")[current_transaction_index].at("vin")[current_position_json].at("vout"))
-                                    << "Transaction (" << current_transaction_index << ") vin (" << current_position_json << ") index n is diffrent for block " << block_number;
+                EXPECT_EQ(vin._prevout.get_index_n(),
+                          parsed_json.at("tx")[current_transaction_index].at("vin")[current_position_json].at("vout"))
+                                    << "Transaction (" << current_transaction_index << ") vin ("
+                                    << current_position_json << ") index n is diffrent for block " << block_number;
 
-                EXPECT_EQ(vin._prevout.get_hash(), to_hash_type(hex_reduction(parsed_json.at("tx")[current_transaction_index].at("vin")[current_position_json].at("txid"))))
-                                    << "Transaction (" << current_transaction_index << ") vin (" << current_position_json << ") txid (hash) is diffrent for block " << block_number;
-                current_position_json++;
+                EXPECT_EQ(vin._prevout.get_hash(), to_hash_type(hex_reduction(
+                        parsed_json.at("tx")[current_transaction_index].at("vin")[current_position_json].at("txid"))))
+                                    << "Transaction (" << current_transaction_index << ") vin ("
+                                    << current_position_json << ") txid (hash) is diffrent for block " << block_number;
             }
-            EXPECT_EQ(current_position_json, current_transaction.get_vin_count()) << "Transaction (" << current_transaction_index << ") vin count is diffrent for block " << block_number;
-
-            current_position_json = 0;
-            for(auto vout : current_transaction.get_vout()) {
-                int64_t amount = static_cast<double>(parsed_json.at("tx")[current_transaction_index].at("vout")[current_position_json].at("value")) * 100000000; // Converting double to int64_t
-                EXPECT_TRUE(std::abs(vout._amount - amount) <=1);
-                current_position_json++;
-            }
-            EXPECT_EQ(current_position_json, current_transaction.get_vout_count()) << "Transaction (" << current_transaction_index << ") vout count is diffrent for block " << block_number;
-            current_transaction_index++;
+            current_position_json++;
         }
-        // Check whether number of transactions checked is equal to transactions present in json
-        EXPECT_EQ(current_transaction_index, b.get_number_of_transactions()) << "Transaction number is different for block " << block_number;
+
+        EXPECT_EQ(current_position_json, current_transaction.get_vin_count()) << "Transaction (" << current_transaction_index << ") vin count is diffrent for block " << block_number;
+
+        current_position_json = 0;
+        for(auto vout : current_transaction.get_vout()) {
+            int64_t amount = static_cast<double>(parsed_json.at("tx")[current_transaction_index].at("vout")[current_position_json].at("value")) * 100000000; // Converting double to int64_t
+            EXPECT_TRUE(std::abs(vout._amount - amount) <=1);
+            current_position_json++;
+        }
+        EXPECT_EQ(current_position_json, current_transaction.get_vout_count()) << "Transaction (" << current_transaction_index << ") vout count is diffrent for block " << block_number;
+        current_transaction_index++;
     }
+    // Check whether number of transactions checked is equal to transactions present in json
+    EXPECT_EQ(current_transaction_index, b.get_number_of_transactions()) << "Transaction number is different for block " << block_number;
+
 
 }
 
@@ -184,3 +183,29 @@ TEST(parsing, correct_block_22389_json) {
 TEST(parsing, correct_block_22390_json) {
     compare_bin_json(22390);
 }
+
+//TEST(parsing, block_chain) {
+//
+//    for (auto i = 15; i >= 0; i--) {
+//        std::cout << "CHECKING BLOCK NUMBER: " << i << std::endl;
+//
+//        compare_bin_json(i);
+//        std::cout << "END OF CHECKING BLOCK NUMBER: " << i << std::endl << std::endl;
+//
+//        if (i != 0) {
+//            std::cout << "DOWNLOADING BLOCK NUMBER: " << i - 1 << std::endl;
+//            std::ifstream f("resources/test-resources/blocks/" + std::to_string(i) + ".bin", std::ios::binary);
+//            block b(f);
+//
+//            std::stringstream ss;
+//            for (auto i : b.get_hash_prev_block()) {
+//                ss << std::setfill('0') << std::setw(2) << std::hex << (int) i;
+//            }
+//
+//            system(("resources/test-resources/blocks/download_blocks.sh " + ss.str() + " " +
+//                    std::to_string(i - 1)).data());
+//            std::cout << "END OF DOWNLOADING BLOCK NUMBER: " << i - 1 << std::endl << std::endl << std::endl
+//                      << std::endl;
+//        }
+//    }
+//}

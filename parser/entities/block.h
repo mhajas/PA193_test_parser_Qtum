@@ -33,19 +33,7 @@ class block {
     vector_type _vch_block_sig;
 
     uint8_t _number_of_transactions;
-
-    //First transaction - coin for miner
-    uint32_t _ft_version;
-    std::array<uint8_t, 41> _ft_unknown_val_1;
-    uint16_t _block_height; // sure this is height checked for other blocks
-    uint8_t _ft_unknown_val2; // maybe another byte of height, but it is weird to have 3 byte integer
-    uint32_t _ft_sequence; // just a guess
-
-    uint8_t _ft_ctxout_number;
-    std::vector<ctxout> _ft_ctxouts;
-    std::uint8_t _ft_number_of_unknown_sequences;
-    std::vector<std::vector<uint8_t>> _ft_unknown_sequences;
-    uint32_t _ft_lock_time;
+    uint16_t _extended_number_of_transactions;
 
     std::vector<transaction> _transactions;
 
@@ -75,32 +63,13 @@ public:
 
     const vector_type& get_vch_block_sig() const;
 
-    uint8_t get_number_of_transactions() const;
+    uint16_t get_number_of_transactions() const;
 
-    uint32_t get_ft_version() const;
-
-    const std::array<uint8_t, 41> &get_ft_unknown_val_1() const;
-
-    uint16_t get_block_height() const;
-
-    uint8_t get_ft_unknown_val2() const;
-
-    uint32_t get_ft_sequence() const;
-
-    uint8_t get_ft_ctxout_number() const;
-
-    const std::vector<ctxout> &get_ft_ctxouts() const;
-
-    uint8_t get_ft_number_of_unknown_sequences() const;
-
-    const std::vector<std::vector<uint8_t>> &get_ft_unknown_sequences() const;
-
-    uint32_t get_ft_lock_time() const;
+    uint32_t get_block_height() const;
   
     std::vector<transaction> get_transactions();
 
     hash_type compute_hash() const;
-    hash_type compute_first_transaction_hash() const;
     hash_type compute_merkle_root() const;
 
 

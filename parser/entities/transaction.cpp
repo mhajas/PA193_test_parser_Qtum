@@ -36,7 +36,15 @@ std::istream& operator>>(std::istream& is, transaction& t) {
         return is;
     }
 
-    for (auto i = 0; i < t._vin_count; i++) {
+    if (t._vin_count == 253) {
+        if (parsing_utils::parse_bytes(is, static_cast<void*>(&t._extended_vin_count), sizeof(t._extended_vin_count), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+            std::cout << "Failed to read in transaction extended vin count" << std::endl;
+            is.setstate(std::ios::failbit);
+            return is;
+        }
+    }
+
+    for (auto i = 0; i < ((t._extended_vin_count == 0) ? t._vin_count : t._extended_vin_count); i++) {
         ctxin inTransaction;
 
         is >> inTransaction;
@@ -55,7 +63,54 @@ std::istream& operator>>(std::istream& is, transaction& t) {
         return is;
     }
 
-    for (auto i = 0; i < t._vout_count; i++) {
+    if(t._vin_count == 0 && t._vout_count == 1) { //in witness present
+        t._has_witness = true;
+
+        if (parsing_utils::parse_bytes(is, static_cast<void*>(&t._vin_count), sizeof(t._vin_count), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+            std::cout << "Failed to read in transaction count" << std::endl;
+            is.setstate(std::ios::failbit);
+            return is;
+        }
+
+
+
+        if (t._vin_count == 253) {
+            if (parsing_utils::parse_bytes(is, static_cast<void*>(&t._extended_vin_count), sizeof(t._extended_vin_count), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+                std::cout << "Failed to read in transaction extended vin count" << std::endl;
+                is.setstate(std::ios::failbit);
+                return is;
+            }
+        }
+
+        for (auto i = 0; i < ((t._extended_vin_count == 0) ? t._vin_count : t._extended_vin_count); i++) {
+            ctxin inTransaction;
+
+            is >> inTransaction;
+
+            if (!is) {
+                std::cout << "Failed to read in transaction number [" << i << "]" << std::endl;
+                return is;
+            }
+
+            t._vin.push_back(std::move(inTransaction));
+        }
+
+        if (parsing_utils::parse_bytes(is, static_cast<void*>(&t._vout_count), sizeof(t._vout_count), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+            std::cout << "Failed to read out transaction count" << std::endl;
+            is.setstate(std::ios::failbit);
+            return is;
+        }
+    }
+
+    if (t._vout_count == 253) {
+        if (parsing_utils::parse_bytes(is, static_cast<void*>(&t._extended_vout_count), sizeof(t._extended_vout_count), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+            std::cout << "Failed to read in transaction extended vout count" << std::endl;
+            is.setstate(std::ios::failbit);
+            return is;
+        }
+    }
+
+    for (auto i = 0; i < t.get_vout_count(); i++) {
         ctxout outTransaction;
         is >> outTransaction;
 
@@ -64,6 +119,33 @@ std::istream& operator>>(std::istream& is, transaction& t) {
             return is;
         }
         t._vout.push_back(std::move(outTransaction));
+    }
+
+    if (t._has_witness) {
+        if (parsing_utils::parse_bytes(is, static_cast<void*>(&t._witnesses_number), sizeof(t._witnesses_number), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+            std::cout << "Failed to read lock time" << std::endl;
+            is.setstate(std::ios::failbit);
+            return is;
+        }
+
+        for(int i = 0; i < t._witnesses_number; i++) {
+            uint8_t size_of_witness;
+            if (parsing_utils::parse_bytes(is, static_cast<void*>(&size_of_witness), sizeof(size_of_witness), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+                std::cout << "Failed to read lock time" << std::endl;
+                is.setstate(std::ios::failbit);
+                return is;
+            }
+            std::vector<uint8_t> witness(size_of_witness);
+
+            if (parsing_utils::parse_bytes(is, static_cast<void*>(&(witness[0])), size_of_witness, parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+                std::cout << "Failed to read lock time" << std::endl;
+                is.setstate(std::ios::failbit);
+                return is;
+            }
+
+            t._witnesses.push_back(std::move(witness));
+        }
+
     }
 
     if (parsing_utils::parse_bytes(is, static_cast<void*>(&t._lock_time), sizeof(t._lock_time), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
@@ -88,21 +170,31 @@ hash_type transaction::compute_hash() const {
     CSHA256 hasher;
     hash_utils::addIntegral(hasher, _version);
 
-    hash_utils::addIntegral(hasher, _vin_count);
+    if (_extended_vin_count != 0) {
+        hash_utils::addIntegral(hasher, uint8_t(253));
+        hash_utils::addIntegral(hasher, _extended_vin_count);
+    } else
+        hash_utils::addIntegral(hasher, _vin_count);
     for(auto it : _vin) {
 
         hash_utils::addContainer(hasher, it._prevout.get_hash());
         hash_utils::addIntegral(hasher, it._prevout.get_index_n());
 
 
-        hash_utils::addIntegral(hasher, it._pub_key_script._size);
+        if (it._pub_key_script.is_extended()) {
+            hash_utils::addIntegral(hasher, uint8_t(253));
+            hash_utils::addIntegral(hasher, it._pub_key_script._extended_size);
+        } else {
+            hash_utils::addIntegral(hasher, it._pub_key_script._size);
+        }
+
         for(auto before_script : it._pub_key_script._before_flags) {
             hash_utils::addIntegral(hasher, before_script);
         }
-
-        hash_utils::addIntegral(hasher, it._pub_key_script._storage_size);
-        hash_utils::addContainer(hasher, it._pub_key_script._storage);
-
+        if (it._pub_key_script._storage_size != 0) {
+            hash_utils::addIntegral(hasher, it._pub_key_script._storage_size);
+            hash_utils::addContainer(hasher, it._pub_key_script._storage);
+        }
         for(auto after_script : it._pub_key_script._after_flags) {
             hash_utils::addIntegral(hasher, after_script);
         }
@@ -110,14 +202,25 @@ hash_type transaction::compute_hash() const {
         hash_utils::addIntegral(hasher, it._sequence);
     }
 
-    hash_utils::addIntegral(hasher, _vout_count);
+
+    if (_extended_vout_count != 0) {
+        hash_utils::addIntegral(hasher, uint8_t(253));
+        hash_utils::addIntegral(hasher, _extended_vout_count);
+    } else
+        hash_utils::addIntegral(hasher, _vout_count);
+
     for(auto it : _vout) {
         hash_utils::addIntegral(hasher, it._amount);
 
 
-        hash_utils::addIntegral(hasher, it._pub_key_script._size);
+        if (it._pub_key_script.is_extended()) {
+            hash_utils::addIntegral(hasher, uint8_t(253));
+            hash_utils::addIntegral(hasher, it._pub_key_script._extended_size);
+        } else {
+            hash_utils::addIntegral(hasher, it._pub_key_script._size);
+        }
 
-        if (it._pub_key_script._size != 0) {
+        if (it._pub_key_script.get_size() != 0) {
             for (auto before_script : it._pub_key_script._before_flags) {
                 hash_utils::addIntegral(hasher, before_script);
             }
@@ -143,16 +246,16 @@ uint32_t transaction::get_version() const {
     return _version;
 }
 
-uint8_t transaction::get_vin_count() const {
-    return _vin_count;
+uint16_t transaction::get_vin_count() const {
+    return _extended_vin_count == 0 ? _vin_count : _extended_vin_count;
 }
 
 const std::vector<ctxin> &transaction::get_vin() const {
     return _vin;
 }
 
-uint8_t transaction::get_vout_count() const {
-    return _vout_count;
+uint16_t transaction::get_vout_count() const {
+    return _extended_vout_count == 0 ? _vout_count : _extended_vout_count;;
 }
 
 const std::vector<ctxout> &transaction::get_vout() const {
@@ -163,8 +266,13 @@ uint32_t transaction::get_lock_time() const {
     return _lock_time;
 }
 
+uint16_t transaction::get_extended_vin_count() const {
+    return _extended_vin_count;
+}
+
 std::istream& operator>>(std::istream& is, ctxin& in) {
     is >> in._prevout;
+
     if (!is) {
         std::cout << "Failed to read prevout for in transaction" << std::endl;
         return is;
@@ -229,6 +337,14 @@ std::istream& operator>>(std::istream& is, c_script& script) {
         return is;
     }
 
+    if (script._size == 253) {
+        if (parsing_utils::parse_bytes(is, static_cast<void*>(&script._extended_size), sizeof(script._extended_size), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
+            std::cout << "Failed to read in transaction extended vin count" << std::endl;
+            is.setstate(std::ios::failbit);
+            return is;
+        }
+    }
+
     if (script._size == 0)
         return is;
 
@@ -239,8 +355,15 @@ std::istream& operator>>(std::istream& is, c_script& script) {
         return is;
     }
 
+    int read_flags = 0;
+
     while (script._storage_size == 0 || script._storage_size >= 0x4c) {
         script._before_flags.push_back(script._storage_size);
+        read_flags++;
+        if (script.get_size() == read_flags) {
+            script._storage_size = 0;
+            break;
+        }
 
         if(parsing_utils::parse_bytes(is, static_cast<void*>(&script._storage_size), sizeof(script._storage_size),
                                       parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
@@ -249,7 +372,6 @@ std::istream& operator>>(std::istream& is, c_script& script) {
             return is;
         }
     }
-
     script._storage.resize(script._storage_size);
 
     if(parsing_utils::parse_reverse_bytes(is, static_cast<void*>(script._storage.data()), script._storage_size,
@@ -259,7 +381,12 @@ std::istream& operator>>(std::istream& is, c_script& script) {
         return is;
     }
 
-    auto after_flag_number = script._size - (script._storage_size + 1 + script._before_flags.size());
+    size_t after_flag_number;
+    if (script._storage_size == 0) {
+        after_flag_number = 0;
+    } else {
+        after_flag_number = script.get_size() - (script._storage_size + 1 + script._before_flags.size());
+    }
     uint8_t flag;
     for (auto i = 0; i < after_flag_number; i++) {
         if(parsing_utils::parse_bytes(is, static_cast<void*>(&flag), sizeof(flag),
@@ -285,7 +412,7 @@ std::ostream& operator<<(std::ostream& os, const ctxout& out){
 
 std::istream& operator>>(std::istream& is, ctxout& out) {
     if (parsing_utils::parse_bytes(is, static_cast<void*>(&out._amount), sizeof(out._amount), parsing_utils::is_big_endian()) != parsing_utils::SUCCESS) {
-        std::cout << "Failed to read Sequence" << std::endl;
+        std::cout << "Failed to read amount" << std::endl;
         is.setstate(std::ios::failbit);
         return is;
     }
@@ -298,3 +425,4 @@ std::istream& operator>>(std::istream& is, ctxout& out) {
 
     return is;
 }
+
