@@ -24,6 +24,8 @@ struct c_out_point{
         return _index_n;
     }
 
+    c_out_point() : _index_n(0) {};
+
 public:
     friend std::ostream& operator<<(std::ostream& os, const c_out_point& out_point);
     friend std::istream& operator>>(std::istream& is, c_out_point& out_point);
@@ -31,12 +33,20 @@ public:
 
 struct c_script{
     uint8_t _size;
+    uint16_t _extended_size;
     std::vector<uint8_t> _before_flags;
     uint8_t _storage_size;
     std::vector<uint8_t> _storage;
     std::vector<uint8_t> _after_flags;
+    bool is_extended() {return _extended_size != 0 ;}
+
+    uint16_t get_size() {return _extended_size == 0 ? _size : _extended_size;}
 
 public:
+    c_script() : _extended_size(0)
+            , _size(0)
+            , _storage_size(0)
+    {};
     friend std::ostream& operator<<(std::ostream& os, const c_script& script);
     friend std::istream& operator>>(std::istream& is, c_script& script);
 };
@@ -46,7 +56,9 @@ struct ctxin {
     c_script _pub_key_script;
     uint32_t _sequence;
 
+
 public:
+
     friend std::ostream& operator<<(std::ostream& os, const ctxin& in);
     friend std::istream& operator>>(std::istream& is, ctxin& in);
 };
@@ -68,14 +80,33 @@ class transaction {
     uint8_t _vout_count;
     std::vector<ctxout> _vout;
     uint32_t _lock_time;
+    uint16_t _extended_vin_count = 0;
+    uint16_t _extended_vout_count = 0;
+    bool _has_witness;
+    uint8_t _witnesses_number;
+    std::vector<std::vector<uint8_t>> _witnesses;
+
+public:
+    transaction() : _extended_vin_count(0)
+            , _extended_vout_count(0)
+            , _has_witness(false)
+            , _version(0)
+            , _vin_count(0)
+            , _vout_count(0)
+            , _lock_time(0)
+            , _witnesses_number(0)
+    {};
+
+    uint16_t get_extended_vin_count() const;
+
 public:
     uint32_t get_version() const;
 
-    uint8_t get_vin_count() const;
+    uint16_t get_vin_count() const;
 
     const std::vector<ctxin> &get_vin() const;
 
-    uint8_t get_vout_count() const;
+    uint16_t get_vout_count() const;
 
     const std::vector<ctxout> &get_vout() const;
 
